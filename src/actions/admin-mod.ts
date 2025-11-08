@@ -3,10 +3,8 @@ import { useAppSession } from "./-sessions/useSession";
 import type { PostSubmition } from "@/schemas/forms/post";
 import { adminHidePost, adminEditPost } from "@/services/posts";
 import { adminHideComment } from "@/services/comments";
-import { promoteUserToModerator, depromoteUser } from "@/services/user";
-import { env } from "cloudflare:workers";
+import { promoteUserToModerator, depromoteUser, getSafeUserByIdWithStatus } from "@/services/user";
 import { logger } from "@/lib/logger";
-import { getUsernameById } from "./-mailer/helpers";
 import { banUser } from "@/db/queries/users_status";
 import { findPostById } from "@/db/queries/posts";
 import { findCommentById } from "@/db/queries/comments";
@@ -22,19 +20,39 @@ const roleValidationMiddleware = createMiddleware({
       tag: "roleValidationMiddleware",
       action: "unauthorized",
     });
-    // Short-circuit: not authenticated
     throw new Error("يجب تسجيل الدخول للتعديل");
   }
-  if (session.data.moderator !== true) {
+
+  const user = await getSafeUserByIdWithStatus(session.data.userId);
+
+  // Check if user exists
+  if (!user) {
+    logger.warn("roleValidationMiddleware", {
+      tag: "roleValidationMiddleware",
+      action: "user_not_found",
+      userId: session.data.userId,
+    });
+    throw new Error("المستخدم غير موجود");
+  }
+
+  // Verify user is the main admin
+  const isMainAdmin =
+    user.username === "v0id_user" &&
+    user.email === "b11z@v0id.me" &&
+    user.verified === true;
+
+  if (!isMainAdmin) {
     logger.warn("roleValidationMiddleware", {
       tag: "roleValidationMiddleware",
       action: "insufficient_permissions",
       userId: session.data.userId,
+      username: user.username,
+      email: user.email,
+      verified: user.verified,
     });
-    // Short-circuit: missing permissions
     throw new Error("ليس لديك صلاحيات التعديل");
   }
-  // All checks passed, continue to handler
+
   return next();
 });
 
@@ -42,16 +60,14 @@ export const adminHidePostFn = createServerFn({ method: "POST" })
   .middleware([roleValidationMiddleware])
   .inputValidator((data: { postId: string; reason: string }) => data)
   .handler(async ({ data }) => {
-    const session = await useAppSession();
     const { postId, reason } = data;
+    const session = await useAppSession();
 
-    // Prevent hiding own posts
     const post = await findPostById(postId);
     if (!post) {
       logger.error("adminHidePostFn", {
         tag: "adminHidePostFn",
         action: "post_not_found",
-        moderatorId: session.data.userId,
         postId,
       });
       return {
@@ -65,7 +81,6 @@ export const adminHidePostFn = createServerFn({ method: "POST" })
       logger.warn("adminHidePostFn", {
         tag: "adminHidePostFn",
         action: "self_action_prevented",
-        moderatorId: session.data.userId,
         postId,
       });
       return {
@@ -75,37 +90,19 @@ export const adminHidePostFn = createServerFn({ method: "POST" })
       };
     }
 
-    logger.info("adminHidePostFn", {
-      tag: "adminHidePostFn",
-      moderatorId: session.data.userId,
-      postId,
-      reason,
-    });
+    logger.info("adminHidePostFn", { postId, reason });
 
     const result = await adminHidePost(postId);
-
     if (!result.success) {
       logger.error("adminHidePostFn", {
-        tag: "adminHidePostFn",
-        moderatorId: session.data.userId,
         postId,
         error: result.error,
         errorCode: result.errorCode,
       });
-      return {
-        success: false,
-        error: result.error,
-        errorCode: result.errorCode,
-      };
+      return result;
     }
 
-    logger.info("adminHidePostFn", {
-      tag: "adminHidePostFn",
-      action: "success",
-      moderatorId: session.data.userId,
-      postId,
-    });
-
+    logger.info("adminHidePostFn", { action: "success", postId });
     return {
       success: true,
       postId: result.postId,
@@ -116,16 +113,14 @@ export const adminHideCommentFn = createServerFn({ method: "POST" })
   .middleware([roleValidationMiddleware])
   .inputValidator((data: { commentId: string }) => data)
   .handler(async ({ data }) => {
-    const session = await useAppSession();
     const { commentId } = data;
+    const session = await useAppSession();
 
-    // Prevent hiding own comments
     const comment = await findCommentById(commentId);
     if (!comment) {
       logger.error("adminHideCommentFn", {
         tag: "adminHideCommentFn",
         action: "comment_not_found",
-        moderatorId: session.data.userId,
         commentId,
       });
       return {
@@ -139,7 +134,6 @@ export const adminHideCommentFn = createServerFn({ method: "POST" })
       logger.warn("adminHideCommentFn", {
         tag: "adminHideCommentFn",
         action: "self_action_prevented",
-        moderatorId: session.data.userId,
         commentId,
       });
       return {
@@ -149,36 +143,19 @@ export const adminHideCommentFn = createServerFn({ method: "POST" })
       };
     }
 
-    logger.info("adminHideCommentFn", {
-      tag: "adminHideCommentFn",
-      moderatorId: session.data.userId,
-      commentId,
-    });
+    logger.info("adminHideCommentFn", { commentId });
 
     const result = await adminHideComment(commentId);
-
     if (!result.success) {
       logger.error("adminHideCommentFn", {
-        tag: "adminHideCommentFn",
-        moderatorId: session.data.userId,
         commentId,
         error: result.error,
         errorCode: result.errorCode,
       });
-      return {
-        success: false,
-        error: result.error,
-        errorCode: result.errorCode,
-      };
+      return result;
     }
 
-    logger.info("adminHideCommentFn", {
-      tag: "adminHideCommentFn",
-      action: "success",
-      moderatorId: session.data.userId,
-      commentId,
-    });
-
+    logger.info("adminHideCommentFn", { action: "success", commentId });
     return {
       success: true,
       commentId: result.commentId,
@@ -191,16 +168,14 @@ export const adminEditPostFn = createServerFn({ method: "POST" })
     (data: PostSubmition & { postId: string; reason: string }) => data,
   )
   .handler(async ({ data }) => {
-    const session = await useAppSession();
     const { postId, reason } = data;
+    const session = await useAppSession();
 
-    // Prevent editing own posts
     const post = await findPostById(postId);
     if (!post) {
       logger.error("adminEditPostFn", {
         tag: "adminEditPostFn",
         action: "post_not_found",
-        moderatorId: session.data.userId,
         postId,
       });
       return {
@@ -214,7 +189,6 @@ export const adminEditPostFn = createServerFn({ method: "POST" })
       logger.warn("adminEditPostFn", {
         tag: "adminEditPostFn",
         action: "self_action_prevented",
-        moderatorId: session.data.userId,
         postId,
       });
       return {
@@ -224,37 +198,19 @@ export const adminEditPostFn = createServerFn({ method: "POST" })
       };
     }
 
-    logger.info("adminEditPostFn", {
-      tag: "adminEditPostFn",
-      moderatorId: session.data.userId,
-      postId,
-      reason,
-    });
+    logger.info("adminEditPostFn", { postId, reason });
 
     const result = await adminEditPost(data, postId, reason);
-
     if (!result.success) {
       logger.error("adminEditPostFn", {
-        tag: "adminEditPostFn",
-        moderatorId: session.data.userId,
         postId,
         error: result.error,
         errorCode: result.errorCode,
       });
-      return {
-        success: false,
-        error: result.error,
-        errorCode: result.errorCode,
-      };
+      return result;
     }
 
-    logger.info("adminEditPostFn", {
-      tag: "adminEditPostFn",
-      action: "success",
-      moderatorId: session.data.userId,
-      postId,
-    });
-
+    logger.info("adminEditPostFn", { action: "success", postId });
     return {
       success: true,
       postId: result.postId,
@@ -262,32 +218,16 @@ export const adminEditPostFn = createServerFn({ method: "POST" })
   });
 
 export const promoteUserFn = createServerFn({ method: "POST" })
-  .inputValidator((data: { username: string; secret_key: string }) => data)
+  .inputValidator((data: { username: string }) => data)
   .handler(async ({ data }) => {
-    const { username, secret_key } = data;
+    const { username } = data;
     const session = await useAppSession();
 
-    // Validate secret key
-    if (!env.MODERATION_SECRET_KEY) {
-      logger.error("promoteUserFn", {
-        tag: "promoteUserFn",
-        action: "secret_key_not_configured",
-        username,
-      });
-      return {
-        success: false,
-        error: "مفتاح الإشراف غير مكوّن",
-        errorCode: "SECRET_KEY_NOT_CONFIGURED",
-      };
-    }
-
-    if (secret_key !== env.MODERATION_SECRET_KEY) {
+    if (session.data?.moderator !== true) {
       logger.warn("promoteUserFn", {
-        tag: "promoteUserFn",
         action: "invalid_secret_key",
         username,
       });
-
       return {
         success: false,
         error: "المفتاح السري غير صحيح",
@@ -295,43 +235,30 @@ export const promoteUserFn = createServerFn({ method: "POST" })
       };
     }
 
-    // Prevent promoting oneself
-    if (session.data?.userId) {
-      const targetUser = await findUserByUsername(username);
-      if (targetUser && targetUser.id === session.data.userId) {
-        logger.warn("promoteUserFn", {
-          tag: "promoteUserFn",
-          action: "self_action_prevented",
-          username,
-          userId: session.data.userId,
-        });
-        return {
-          success: false,
-          error: "لا يمكنك ترقية نفسك",
-          errorCode: "SELF_ACTION_NOT_ALLOWED",
-        };
-      }
+    const targetUser = await findUserByUsername(username);
+    if (targetUser?.id === session.data.userId) {
+      logger.warn("promoteUserFn", {
+        action: "self_action_prevented",
+        username,
+      });
+      return {
+        success: false,
+        error: "لا يمكنك ترقية نفسك",
+        errorCode: "SELF_ACTION_NOT_ALLOWED",
+      };
     }
 
-    // Promote user
     const result = await promoteUserToModerator(username);
-
     if (!result.success) {
       logger.error("promoteUserFn", {
-        tag: "promoteUserFn",
         username,
         error: result.error,
         errorCode: result.errorCode,
       });
-      return {
-        success: false,
-        error: result.error,
-        errorCode: result.errorCode,
-      };
+      return result;
     }
 
     logger.info("promoteUserFn", {
-      tag: "promoteUserFn",
       action: "success",
       username: result.username,
       userId: result.userId,
@@ -345,28 +272,13 @@ export const promoteUserFn = createServerFn({ method: "POST" })
   });
 
 export const deomoteUserFn = createServerFn({ method: "POST" })
-  .inputValidator((data: { username: string; secret_key: string }) => data)
+  .inputValidator((data: { username: string }) => data)
   .handler(async ({ data }) => {
-    const { username, secret_key } = data;
+    const { username } = data;
     const session = await useAppSession();
 
-    // Validate secret key
-    if (!env.MODERATION_SECRET_KEY) {
-      logger.error("depromoteUserFn", {
-        tag: "depromoteUserFn",
-        action: "secret_key_not_configured",
-        username,
-      });
-      return {
-        success: false,
-        error: "مفتاح الإشراف غير مكوّن",
-        errorCode: "SECRET_KEY_NOT_CONFIGURED",
-      };
-    }
-
-    if (secret_key !== env.MODERATION_SECRET_KEY) {
+    if (session.data?.moderator !== true) {
       logger.warn("depromoteUserFn", {
-        tag: "depromoteUserFn",
         action: "invalid_secret_key",
         username,
       });
@@ -377,43 +289,30 @@ export const deomoteUserFn = createServerFn({ method: "POST" })
       };
     }
 
-    // Prevent demoting oneself
-    if (session.data?.userId) {
-      const targetUser = await findUserByUsername(username);
-      if (targetUser && targetUser.id === session.data.userId) {
-        logger.warn("depromoteUserFn", {
-          tag: "depromoteUserFn",
-          action: "self_action_prevented",
-          username,
-          userId: session.data.userId,
-        });
-        return {
-          success: false,
-          error: "لا يمكنك تخفيض رتبة نفسك",
-          errorCode: "SELF_ACTION_NOT_ALLOWED",
-        };
-      }
+    const targetUser = await findUserByUsername(username);
+    if (targetUser?.id === session.data.userId) {
+      logger.warn("depromoteUserFn", {
+        action: "self_action_prevented",
+        username,
+      });
+      return {
+        success: false,
+        error: "لا يمكنك تخفيض رتبة نفسك",
+        errorCode: "SELF_ACTION_NOT_ALLOWED",
+      };
     }
 
-    // Depromote user
     const result = await depromoteUser(username);
-
     if (!result.success) {
       logger.error("depromoteUserFn", {
-        tag: "depromoteUserFn",
         username,
         error: result.error,
         errorCode: result.errorCode,
       });
-      return {
-        success: false,
-        error: result.error,
-        errorCode: result.errorCode,
-      };
+      return result;
     }
 
     logger.info("depromoteUserFn", {
-      tag: "depromoteUserFn",
       action: "success",
       username: result.username,
       userId: result.userId,
@@ -427,46 +326,14 @@ export const deomoteUserFn = createServerFn({ method: "POST" })
   });
 
 export const banUserFn = createServerFn({ method: "POST" })
+  .middleware([roleValidationMiddleware])
   .inputValidator((data: { userId: string }) => data)
   .handler(async ({ data }) => {
     const { userId } = data;
-
-    // Get current session and username performing the action
     const session = await useAppSession();
-    if (!session.data?.userId) {
-      logger.error("banUserFn", {
-        tag: "banUserFn",
-        action: "user_not_found",
-        userId,
-      });
-      return {
-        success: false,
-        error: "المستخدم غير موجود",
-        errorCode: "USER_NOT_FOUND",
-      };
-    }
 
-    const actingUsername = await getUsernameById(session.data.userId);
-
-    // Only allow "v0id_user" to perform a ban
-    if (actingUsername !== "v0id_user") {
-      logger.error("banUserFn", {
-        tag: "banUserFn",
-        action: "not_authorized_to_ban",
-        actingUsername,
-        userId,
-      });
-      return {
-        success: false,
-        error: "غير مصرح لك بحظر المستخدمين",
-        errorCode: "NOT_AUTHORIZED_TO_BAN",
-      };
-    }
-
-    // Prevent banning the main admin (v0id_user) himself
     if (userId === session.data.userId) {
       logger.error("banUserFn", {
-        tag: "banUserFn",
         action: "admin_cannot_ban_self",
         userId,
       });
@@ -477,7 +344,6 @@ export const banUserFn = createServerFn({ method: "POST" })
       };
     }
 
-    // Ban for 1 month from now
     const bannedUntil = new Date();
     bannedUntil.setMonth(bannedUntil.getMonth() + 1);
 
@@ -488,23 +354,14 @@ export const banUserFn = createServerFn({ method: "POST" })
     );
 
     if (!result.success) {
-      logger.error("banUserFn", {
-        tag: "banUserFn",
-        userId,
-        error: result.error,
-      });
+      logger.error("banUserFn", { userId, error: result.error });
       return {
         success: false,
         error: result.error,
       };
     }
 
-    logger.info("banUserFn", {
-      tag: "banUserFn",
-      action: "success",
-      userId,
-    });
-
+    logger.info("banUserFn", { action: "success", userId });
     return {
       success: true,
       userId,

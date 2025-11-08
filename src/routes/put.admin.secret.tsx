@@ -25,7 +25,6 @@ export const Route = createFileRoute("/put/admin/secret")({
 
 function RouteComponent() {
   const [username, setUsername] = useState("");
-  const [secretKey, setSecretKey] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -41,7 +40,6 @@ function RouteComponent() {
       const result = await promoteUserFn({
         data: {
           username: username.trim(),
-          secret_key: secretKey,
         },
       });
 
@@ -51,7 +49,6 @@ function RouteComponent() {
           text: `تم ترقية المستخدم ${result.username} إلى مشرف بنجاح`,
         });
         setUsername("");
-        setSecretKey("");
       } else {
         setMessage({
           type: "error",
@@ -87,24 +84,6 @@ function RouteComponent() {
             onChange={(e) => setUsername(e.target.value)}
             required
             placeholder="username"
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 focus:outline-none focus:border-gray-500"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="secretKey"
-            className="block text-xs mb-1 text-gray-600"
-          >
-            المفتاح السري
-          </label>
-          <input
-            type="password"
-            id="secretKey"
-            value={secretKey}
-            onChange={(e) => setSecretKey(e.target.value)}
-            required
-            placeholder="••••••••"
             className="w-full px-2 py-1.5 text-sm border border-gray-300 focus:outline-none focus:border-gray-500"
           />
         </div>

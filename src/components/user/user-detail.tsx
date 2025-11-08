@@ -18,6 +18,7 @@ import { timeAgo } from "@/lib/time";
 import { updateUserProfileFn } from "@/actions/user-submit";
 import type { UserBadgeWithMetadata } from "@/types/badges";
 import { BadgeList } from "../badge";
+import { promoteUserFn, deomoteUserFn, banUserFn } from "@/actions/admin-mod";
 
 type UserWithStatus = (SafeUser & UserStatus) | null;
 
@@ -71,6 +72,33 @@ export function UserDetail({
     }
   };
 
+  const handlePromoteUser = async () => {
+    const response = await promoteUserFn({ data: { username: _user?.username  } });
+    if (!response.success) {
+      setServerError(response.error || "حدث خطأ أثناء ترقية المستخدم");
+      return;
+    }
+    setSuccessMessage("تم ترقية المستخدم بنجاح");
+  };
+
+  const handleDepromoteUser = async () => {
+    const response = await deomoteUserFn({ data: { username: _user?.username  } });
+    if (!response.success) {
+      setServerError(response.error || "حدث خطأ أثناء تخفيض المستخدم");
+      return;
+    }
+    setSuccessMessage("تم تخفيض المستخدم بنجاح");
+  };
+
+  const handleBanUser = async () => {
+    const response = await banUserFn({ data: { userId: _user?.userId  } });
+    if (!response.success) {
+      setServerError(response.error || "حدث خطأ أثناء حظر المستخدم");
+      return;
+    }
+    setSuccessMessage("تم حظر المستخدم بنجاح");
+  };
+
   const profileForm = useForm({
     ...userProfileFormOpts,
     defaultValues: {
@@ -102,6 +130,7 @@ export function UserDetail({
                   <button
                     type="button"
                     className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                    onClick={handlePromoteUser}
                   >
                     ترقية المستخدم
                   </button>
@@ -110,13 +139,15 @@ export function UserDetail({
                   <button
                     type="button"
                     className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                    onClick={handleDepromoteUser}
                   >
                     تخفيض المستخدم
                   </button>
                 )}
                 <button
                   type="button"
-                  className="text-gray-600 underline hover:text-[#006CFF]"
+                  className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                  onClick={handleBanUser}
                 >
                   حظر المستخدم لمدة شهر
                 </button>
