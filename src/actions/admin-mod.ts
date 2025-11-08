@@ -265,6 +265,7 @@ export const promoteUserFn = createServerFn({ method: "POST" })
   .inputValidator((data: { username: string; secret_key: string }) => data)
   .handler(async ({ data }) => {
     const { username, secret_key } = data;
+    const session = await useAppSession();
 
     // Validate secret key
     if (!env.MODERATION_SECRET_KEY) {
@@ -295,7 +296,6 @@ export const promoteUserFn = createServerFn({ method: "POST" })
     }
 
     // Prevent promoting oneself
-    const session = await useAppSession();
     if (session.data?.userId) {
       const targetUser = await findUserByUsername(username);
       if (targetUser && targetUser.id === session.data.userId) {
@@ -348,6 +348,7 @@ export const deomoteUserFn = createServerFn({ method: "POST" })
   .inputValidator((data: { username: string; secret_key: string }) => data)
   .handler(async ({ data }) => {
     const { username, secret_key } = data;
+    const session = await useAppSession();
 
     // Validate secret key
     if (!env.MODERATION_SECRET_KEY) {
@@ -377,7 +378,6 @@ export const deomoteUserFn = createServerFn({ method: "POST" })
     }
 
     // Prevent demoting oneself
-    const session = await useAppSession();
     if (session.data?.userId) {
       const targetUser = await findUserByUsername(username);
       if (targetUser && targetUser.id === session.data.userId) {
@@ -433,7 +433,20 @@ export const banUserFn = createServerFn({ method: "POST" })
 
     // Get current session and username performing the action
     const session = await useAppSession();
-    const actingUsername = await getUsernameById(session.data.userId!);
+    if (!session.data?.userId) {
+      logger.error("banUserFn", {
+        tag: "banUserFn",
+        action: "user_not_found",
+        userId,
+      });
+      return {
+        success: false,
+        error: "المستخدم غير موجود",
+        errorCode: "USER_NOT_FOUND",
+      };
+    }
+
+    const actingUsername = await getUsernameById(session.data.userId);
 
     // Only allow "v0id_user" to perform a ban
     if (actingUsername !== "v0id_user") {
