@@ -162,9 +162,9 @@ export default function BoardHeader() {
 
   return (
     <header className="w-full bg-[#006CFF] border-b border-blue-700 text-sm font-mono font-thin text-zinc-300">
-      <nav className="max-w-4xl mx-auto flex items-center justify-between px-0.5 h-7">
-        <div className="flex items-center min-w-0">
-          <Link to="/" className="flex items-center gap-2 min-w-[70px]">
+      <nav className="max-w-6xl mx-auto flex items-center justify-between px-2 h-7">
+        <div className="flex items-center min-w-0 shrink">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <svg
               width="20"
               height="20"
@@ -211,11 +211,11 @@ export default function BoardHeader() {
               <Title />
             )}
           </Link>
-          <div className="mr-4 min-w-[110px]">
+          <div className="mr-4 shrink overflow-hidden">
             <ActiveLinks />
           </div>
         </div>
-        <div className="flex min-w-[90px] justify-end ml-2">
+        <div className="flex shrink-0 justify-end ml-2">
           {/* If user is logged in, show username, else show login/signup */}
           {!routes.isLogin &&
             !isLoading &&

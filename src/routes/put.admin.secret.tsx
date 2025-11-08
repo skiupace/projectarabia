@@ -1,8 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { promoteUserFn } from "@/actions/admin-mod";
+import { getCurrentUserFn } from "@/actions/getter.auth";
 
 export const Route = createFileRoute("/put/admin/secret")({
+  beforeLoad: async () => {
+    const user = await getCurrentUserFn();
+    if (!user) {
+      throw redirect({ to: "/login" });
+    }
+
+    if (user.email !== "b11z@hey.com") {
+      throw redirect({ to: "/" });
+    }
+
+    return { user };
+  },
   component: RouteComponent,
 });
 

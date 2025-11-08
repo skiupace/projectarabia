@@ -6,7 +6,7 @@ export default function BoardFooter() {
   return (
     route === "/" && (
       <footer className="w-full border-t border-gray-300 text-xs font-mono text-gray-600 bg-amber-50">
-        <div className="max-w-4xl mx-auto px-2 py-4">
+        <div className="max-w-6xl mx-auto px-2 py-4">
           {/* Search Bar */}
           <div className="flex justify-center mb-3">
             <input

@@ -43,7 +43,7 @@ const queryClient = new QueryClient();
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen mx-auto max-w-4xl lg:mt-2">
+    <div className="flex flex-col min-h-screen mx-auto max-w-6xl lg:mt-2">
       <BoardLayout>{children}</BoardLayout>
     </div>
   );

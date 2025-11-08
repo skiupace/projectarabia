@@ -3,6 +3,7 @@ import {
   getUserStatus,
   unverifyUser,
   promoteToModerator,
+  demoteToUser as depromoteUserDb,
   createUserStatus,
 } from "@/db/queries/users_status";
 
@@ -223,6 +224,55 @@ export async function promoteUserToModerator(username: string) {
 
   // Promote user to moderator
   await promoteToModerator(user.id);
+
+  return {
+    success: true,
+    userId: user.id,
+    username: user.username,
+  };
+}
+
+export async function depromoteUser(username: string) {
+  // Validate username
+  const usernameValidation = validateUsername(username);
+  if (!usernameValidation.valid) {
+    return {
+      success: false,
+      error: usernameValidation.error ?? "اسم المستخدم غير صالح",
+      errorCode: usernameValidation.errorCode ?? "INVALID_USERNAME",
+    };
+  }
+
+  // Find user by username
+  const user = await getUserByUsername(username);
+  if (!user) {
+    return {
+      success: false,
+      error: "المستخدم غير موجود",
+      errorCode: "USER_NOT_FOUND",
+    };
+  }
+
+  // Get or create user status
+  const status = await getUserStatus(user.id);
+  if (!status) {
+    return {
+      success: false,
+      error: "فشل إنشاء حالة المستخدم",
+      errorCode: "USER_STATUS_CREATION_FAILED",
+    };
+  }
+
+  if (status.role !== "moderator") {
+    return {
+      success: false,
+      error: "المستخدم ليس مشرف",
+      errorCode: "NOT_MODERATOR",
+    };
+  }
+
+  // Depromote user
+  await depromoteUserDb(user.id);
 
   return {
     success: true,

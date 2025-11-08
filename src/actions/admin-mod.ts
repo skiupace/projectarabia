@@ -3,7 +3,7 @@ import { useAppSession } from "./-sessions/useSession";
 import type { PostSubmition } from "@/schemas/forms/post";
 import { adminHidePost, adminEditPost } from "@/services/posts";
 import { adminHideComment } from "@/services/comments";
-import { promoteUserToModerator } from "@/services/user";
+import { promoteUserToModerator, depromoteUser } from "@/services/user";
 import { env } from "cloudflare:workers";
 import { logger } from "@/lib/logger";
 
@@ -218,6 +218,69 @@ export const promoteUserFn = createServerFn({ method: "POST" })
 
     logger.info("promoteUserFn", {
       tag: "promoteUserFn",
+      action: "success",
+      username: result.username,
+      userId: result.userId,
+    });
+
+    return {
+      success: true,
+      username: result.username,
+      userId: result.userId,
+    };
+  });
+
+export const deomoteUserFn = createServerFn({ method: "POST" })
+  .inputValidator((data: { username: string; secret_key: string }) => data)
+  .handler(async ({ data }) => {
+    const { username, secret_key } = data;
+
+    // Validate secret key
+    if (!env.MODERATION_SECRET_KEY) {
+      logger.error("depromoteUserFn", {
+        tag: "depromoteUserFn",
+        action: "secret_key_not_configured",
+        username,
+      });
+      return {
+        success: false,
+        error: "مفتاح الإشراف غير مكوّن",
+        errorCode: "SECRET_KEY_NOT_CONFIGURED",
+      };
+    }
+
+    if (secret_key !== env.MODERATION_SECRET_KEY) {
+      logger.warn("depromoteUserFn", {
+        tag: "depromoteUserFn",
+        action: "invalid_secret_key",
+        username,
+      });
+      return {
+        success: false,
+        error: "المفتاح السري غير صحيح",
+        errorCode: "INVALID_SECRET_KEY",
+      };
+    }
+
+    // Depromote user
+    const result = await depromoteUser(username);
+
+    if (!result.success) {
+      logger.error("depromoteUserFn", {
+        tag: "depromoteUserFn",
+        username,
+        error: result.error,
+        errorCode: result.errorCode,
+      });
+      return {
+        success: false,
+        error: result.error,
+        errorCode: result.errorCode,
+      };
+    }
+
+    logger.info("depromoteUserFn", {
+      tag: "depromoteUserFn",
       action: "success",
       username: result.username,
       userId: result.userId,

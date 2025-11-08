@@ -12,7 +12,10 @@ import { useCommentsStore } from "@/stores/comments";
 import { commentSubmitFn } from "@/actions/comment-submit";
 import type { Comment } from "@/components/comment/comment-thread";
 import { differenceInMinutes } from "date-fns";
-import { EDIT_COOLDOWN_MINUTES, MAX_COMMENT_TEXT_LENGTH } from "@/constants/limts";
+import {
+  EDIT_COOLDOWN_MINUTES,
+  MAX_COMMENT_TEXT_LENGTH,
+} from "@/constants/limts";
 
 export interface CommentItemProps {
   postId: string;
@@ -181,7 +184,9 @@ export default function CommentItem({
     }
 
     if (editText.length > MAX_COMMENT_TEXT_LENGTH) {
-      setEditError(`التعليق طويل جداً (الحد الأقصى ${MAX_COMMENT_TEXT_LENGTH} حرف)`);
+      setEditError(
+        `التعليق طويل جداً (الحد الأقصى ${MAX_COMMENT_TEXT_LENGTH} حرف)`,
+      );
       return;
     }
 
@@ -407,34 +412,39 @@ export default function CommentItem({
                       <span className="text-zinc-400">•</span>
                     </>
                   )}
-                  {isLoggedIn && user?.username === comment.username && differenceInMinutes(new Date(), new Date(comment.createdAt)) < EDIT_COOLDOWN_MINUTES && (
-                    <>
-                      {!postHidden && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setIsEditing(true)}
-                            className="text-[10px] text-zinc-500 hover:text-[#006CFF] hover:underline transition-colors cursor-pointer"
-                          >
-                            تعديل
-                          </button>
-                          <span className="text-zinc-400">•</span>
-                        </>
-                      )}
-                      <button
-                        type="button"
-                        className={`text-[10px] ${
-                          confirmDelete
-                            ? "text-red-600 font-bold"
-                            : "text-zinc-500"
-                        } hover:text-red-500 hover:underline transition-colors cursor-pointer`}
-                        onClick={handleDelete}
-                      >
-                        {confirmDelete ? "تأكيد الحذف" : "حذف"}
-                      </button>
-                      <span className="text-zinc-400">•</span>
-                    </>
-                  )}
+                  {isLoggedIn &&
+                    user?.username === comment.username &&
+                    differenceInMinutes(
+                      new Date(),
+                      new Date(comment.createdAt),
+                    ) < EDIT_COOLDOWN_MINUTES && (
+                      <>
+                        {!postHidden && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setIsEditing(true)}
+                              className="text-[10px] text-zinc-500 hover:text-[#006CFF] hover:underline transition-colors cursor-pointer"
+                            >
+                              تعديل
+                            </button>
+                            <span className="text-zinc-400">•</span>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          className={`text-[10px] ${
+                            confirmDelete
+                              ? "text-red-600 font-bold"
+                              : "text-zinc-500"
+                          } hover:text-red-500 hover:underline transition-colors cursor-pointer`}
+                          onClick={handleDelete}
+                        >
+                          {confirmDelete ? "تأكيد الحذف" : "حذف"}
+                        </button>
+                        <span className="text-zinc-400">•</span>
+                      </>
+                    )}
                   {isLoggedIn &&
                     (didReport ? (
                       <button

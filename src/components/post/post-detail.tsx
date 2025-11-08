@@ -258,28 +258,31 @@ export default function PostDetail({ post, commentsLength }: PostDetailProps) {
             {post.userBadges.length > 0 && (
               <BadgeList badges={post.userBadges} />
             )}
-            {isLoggedIn && user.username === post.username && differenceInMinutes(new Date(), new Date(post.createdAt)) < EDIT_COOLDOWN_MINUTES && (
-              <>
-                <span className="text-zinc-400">•</span>
-                <Link
-                  to="/post/e/$postId"
-                  params={{ postId: post.postId }}
-                  className="hover:text-[#006CFF] hover:underline transition-colors cursor-pointer"
-                >
-                  تعديل
-                </Link>
-                <span className="text-zinc-400">•</span>
-                <button
-                  type="button"
-                  className={`${
-                    confirmDelete ? "text-red-600 font-bold" : "text-zinc-500"
-                  } hover:text-red-500 hover:underline transition-colors cursor-pointer`}
-                  onClick={handleDelete}
-                >
-                  {confirmDelete ? "تأكيد الحذف" : "حذف"}
-                </button>
-              </>
-            )}
+            {isLoggedIn &&
+              user.username === post.username &&
+              differenceInMinutes(new Date(), new Date(post.createdAt)) <
+                EDIT_COOLDOWN_MINUTES && (
+                <>
+                  <span className="text-zinc-400">•</span>
+                  <Link
+                    to="/post/e/$postId"
+                    params={{ postId: post.postId }}
+                    className="hover:text-[#006CFF] hover:underline transition-colors cursor-pointer"
+                  >
+                    تعديل
+                  </Link>
+                  <span className="text-zinc-400">•</span>
+                  <button
+                    type="button"
+                    className={`${
+                      confirmDelete ? "text-red-600 font-bold" : "text-zinc-500"
+                    } hover:text-red-500 hover:underline transition-colors cursor-pointer`}
+                    onClick={handleDelete}
+                  >
+                    {confirmDelete ? "تأكيد الحذف" : "حذف"}
+                  </button>
+                </>
+              )}
             <span className="text-zinc-400">•</span>
             <span>{timeAgo(post.createdAt)}</span>
             {isLoggedIn && didVote && (
