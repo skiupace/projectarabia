@@ -1,0 +1,38 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+
+  "tags": ["-lintignore", "-internal"],
+
+  "entry": [
+    "src/router.tsx",
+    "src/routeTree.gen.ts",
+    "src/routes/**/*.tsx",
+    "src/db/**/*.ts",
+    "worker/index.ts"
+  ],
+
+  "project": ["src/**/*.ts", "src/**/*.tsx", "worker/**/*.ts"],
+
+  "ignoreFiles": [
+    "src/routeTree.gen.ts"
+  ],
+
+  "ignore": [
+    "src/test/**",
+    "tests/**",
+    "scripts/**",
+    "dist/**"
+  ],
+
+  "ignoreDependencies": [
+    "@types/bcryptjs",
+    "@tanstack/router-plugin"
+  ],
+
+  "treatConfigHintsAsErrors": false
+}
