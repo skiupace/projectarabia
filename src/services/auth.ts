@@ -16,6 +16,7 @@ import {
   validateEmail,
   validatePassword,
 } from "./validation";
+import { timeUntil } from "@/lib/time";
 
 // Password hashing with bcrypt
 async function hashPassword(password: string): Promise<string> {
@@ -198,7 +199,7 @@ export async function loginUser(
     if (now < bannedUntilDate) {
       return {
         success: false,
-        error: `حسابك محظور حتى ${bannedUntilDate.toLocaleDateString("ar")}`,
+        error: `حسابك محظور، ينتهي الحظر ${timeUntil(status.bannedUntil)}`,
         errorCode: "USER_BANNED",
       };
     }

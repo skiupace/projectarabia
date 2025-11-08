@@ -32,6 +32,7 @@ import { getUserBadges } from "./badges";
 import { findUserByUsername } from "@/db/queries/users";
 import { differenceInMinutes } from "date-fns";
 import { EDIT_COOLDOWN_MINUTES } from "@/constants/limts";
+import { timeUntil } from "@/lib/time";
 
 // Re-export types for backwards compatibility
 export type { PostWithUsername, CommentWithUsername, PostWithComments };
@@ -50,7 +51,7 @@ async function validateUserStatus(
     if (now < bannedUntilDate) {
       return {
         valid: false,
-        error: `حسابك محظور حتى ${bannedUntilDate.toLocaleDateString("ar")}`,
+        error: `حسابك محظور، ينتهي الحظر ${timeUntil(status.bannedUntil)}`,
         errorCode: "USER_BANNED",
       };
     }
@@ -62,7 +63,7 @@ async function validateUserStatus(
     if (now < mutedUntilDate) {
       return {
         valid: false,
-        error: `حسابك مكتوم حتى ${mutedUntilDate.toLocaleDateString("ar")}`,
+        error: `حسابك مكتوم، ينتهي الكتم ${timeUntil(status.mutedUntil)}`,
         errorCode: "USER_MUTED",
       };
     }

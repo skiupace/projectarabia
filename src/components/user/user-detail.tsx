@@ -14,7 +14,7 @@ import {
   userProfileFormOpts,
   type UserProfileSubmission,
 } from "@/schemas/forms/user-profile";
-import { timeAgo } from "@/lib/time";
+import { timeAgo, timeUntil } from "@/lib/time";
 import { updateUserProfileFn } from "@/actions/user-submit";
 import type { UserBadgeWithMetadata } from "@/types/badges";
 import { BadgeList } from "../badge";
@@ -79,6 +79,9 @@ export function UserDetail({
       return;
     }
     setSuccessMessage("تم ترقية المستخدم بنجاح");
+
+    // Hard reload the page to reflect changes
+    window.location.reload();
   };
 
   const handleDepromoteUser = async () => {
@@ -88,6 +91,9 @@ export function UserDetail({
       return;
     }
     setSuccessMessage("تم تخفيض المستخدم بنجاح");
+
+    // Hard reload the page to reflect changes
+    window.location.reload();
   };
 
   const handleBanUser = async () => {
@@ -97,6 +103,9 @@ export function UserDetail({
       return;
     }
     setSuccessMessage("تم حظر المستخدم بنجاح");
+
+    // Hard reload the page to reflect changes
+    window.location.reload();
   };
 
   const profileForm = useForm({
@@ -118,9 +127,9 @@ export function UserDetail({
         <div className="flex flex-col gap-2">
           {/* Banned Notice */}
           {isBanned && _user?.bannedUntil && (
-            <div className="bg-red-50 border border-red-200 p-2 rounded text-xs text-red-700">
+            <div className="text-xs text-red-700">
               <span className="font-bold">تنبيه: </span>
-              هذا المستخدم محظور حتى {timeAgo(_user.bannedUntil)}
+              هذا المستخدم محظور، ينتهي الحظر {timeUntil(_user.bannedUntil)}
             </div>
           )}
 
