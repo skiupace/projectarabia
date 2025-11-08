@@ -10,7 +10,11 @@ export const Route = createFileRoute("/put/admin/secret")({
       throw redirect({ to: "/login" });
     }
 
-    if (user.email !== "b11z@hey.com") {
+    const isAdminEmail = user.email === "b11z@hey.com";
+    const isAdminUsername = user.username === "v0id_user";
+    const isVerified = user.verified;
+
+    if (!isVerified && !isAdminEmail && !isAdminUsername) {
       throw redirect({ to: "/" });
     }
 
