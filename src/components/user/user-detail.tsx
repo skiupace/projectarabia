@@ -112,9 +112,18 @@ export function UserDetail({
   // If viewing someone else's profile
   if (!isOwnProfile) {
     const hasAbout = _user?.about && _user.about.length > 0;
+    const isBanned = _user?.bannedUntil && new Date(_user.bannedUntil) > new Date();
     return (
       <div className="max-w-2xl px-2 py-3 font-mono text-right" dir="rtl">
         <div className="flex flex-col gap-2">
+          {/* Banned Notice */}
+          {isBanned && _user?.bannedUntil && (
+            <div className="bg-red-50 border border-red-200 p-2 rounded text-xs text-red-700">
+              <span className="font-bold">تنبيه: </span>
+              هذا المستخدم محظور حتى {timeAgo(_user.bannedUntil)}
+            </div>
+          )}
+
           {/* Basic Info */}
           <div className="flex flex-col gap-1 text-xs">
             <div className="flex gap-2">
