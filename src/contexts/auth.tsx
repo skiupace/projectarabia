@@ -5,7 +5,7 @@ import type { SafeUser, UserStatus } from "@/schemas/db/schema";
 import { useQuery } from "@tanstack/react-query";
 
 type AuthContextType = {
-  user: (SafeUser & UserStatus) | null;
+  user: (SafeUser & UserStatus & { isOwner: boolean }) | null;
   isLoading: boolean;
   refetch: () => void;
 };

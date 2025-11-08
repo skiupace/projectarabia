@@ -93,11 +93,42 @@ export function UserDetail({
               <span className="text-gray-600 whitespace-nowrap">المستخدم:</span>
               <span>{_user?.username || "v0id_user"}</span>
             </div>
+            {currentUser?.isOwner && (
+              <>
+                <div className="flex gap-2">
+                  <span className="font-medium text-purple-600">
+                    ادوات الادارة:
+                  </span>
+                  {_user?.role !== "moderator" && (
+                    <button
+                      type="button"
+                      className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                    >
+                      ترقية المستخدم
+                    </button>
+                  )}
+                  {_user?.role === "moderator" && (
+                    <button
+                      type="button"
+                      className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                    >
+                      تخفيض المستخدم
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="text-gray-600 underline hover:text-[#006CFF]"
+                  >
+                    حظر المستخدم لمدة شهر
+                  </button>
+                </div>
+              </>
+            )}
             <div className="flex gap-2">
               <span className="text-gray-600 whitespace-nowrap">
                 تاريخ الإنشاء:
               </span>
-              <span>{timeAgo(_user?.createdAt || "")}</span>
+              <span>{timeAgo(_user.createdAt)}</span>
             </div>
             <div className="flex gap-2">
               <span className="text-gray-600 whitespace-nowrap">الكارما:</span>
@@ -170,7 +201,7 @@ export function UserDetail({
               <span className="text-gray-600 whitespace-nowrap">
                 تاريخ الإنشاء:
               </span>
-              <span>{timeAgo(_user?.createdAt || "")}</span>
+              <span>{timeAgo(_user.createdAt)}</span>
             </div>
             <div className="flex gap-2">
               <span className="text-gray-600 whitespace-nowrap">الكارما:</span>

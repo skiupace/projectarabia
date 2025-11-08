@@ -497,4 +497,3 @@ export const banUserFn = createServerFn({ method: "POST" })
       userId,
     };
   });
-

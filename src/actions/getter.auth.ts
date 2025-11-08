@@ -27,18 +27,28 @@ export const getCurrentUserFn = createServerFn({ method: "GET" }).handler(
     if (!user) {
       logger.error("getCurrentUserFn", {
         tag: "getCurrentUserFn",
-        action: "user_not_found",
+        action: "username_not_found",
         userId,
       });
       return null;
     }
 
+    // The owner is v0id_user with email b11z@v0id.me (see log sample)
+    const isOwner =
+      user.username === "v0id_user" &&
+      user.verified &&
+      user.email === "b11z@v0id.me";
+
     logger.debug("getCurrentUserFn", {
       tag: "getCurrentUserFn",
       action: "success",
       userId,
+      isOwner,
+      username: user.username,
+      email: user.email,
+      verified: user.verified,
     });
 
-    return user;
+    return { ...user, isOwner };
   },
 );

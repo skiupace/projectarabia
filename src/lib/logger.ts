@@ -23,7 +23,6 @@ class Logger {
       "authorization",
       "cookie",
       "session",
-      "email",
     ];
 
     if (Array.isArray(data)) {
