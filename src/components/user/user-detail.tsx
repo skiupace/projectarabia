@@ -1,5 +1,3 @@
-import type { UserStatus } from "@/schemas/db/user_status";
-import type { SafeUser } from "@/schemas/db/users";
 import { useAuth } from "@/contexts/auth";
 import { Link } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
@@ -19,8 +17,7 @@ import { updateUserProfileFn } from "@/actions/user-submit";
 import type { UserBadgeWithMetadata } from "@/types/badges";
 import { BadgeList } from "../badge";
 import { promoteUserFn, deomoteUserFn, banUserFn } from "@/actions/admin-mod";
-
-type UserWithStatus = (SafeUser & UserStatus) | null;
+import type { UserWithStatus } from "@/types/users";
 
 // Adapter to convert ValidationResult to TanStack Form error format
 const toFormError = (result: ValidationResult): string | undefined => {
@@ -75,7 +72,7 @@ export function UserDetail({
   const handlePromoteUser = async () => {
     const response = await promoteUserFn({ data: { username: _user?.username  } });
     if (!response.success) {
-      setServerError(response.error || "حدث خطأ أثناء ترقية المستخدم");
+      setServerError("حدث خطأ أثناء ترقية المستخدم");
       return;
     }
     setSuccessMessage("تم ترقية المستخدم بنجاح");

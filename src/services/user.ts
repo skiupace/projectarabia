@@ -18,6 +18,7 @@ import { upsertVerification } from "./verifications";
 import { validateTurnstile } from "./cloudflare";
 import { revokeBadge } from "./badges";
 import { BadgeId } from "@/enum/badges";
+import type { UserWithStatus } from "@/types/users";
 
 async function getUserByUsername(username: string): Promise<User | null> {
   // Validate username
@@ -68,7 +69,7 @@ export async function getSafeUserByIdWithStatus(
 
 export async function getSafeUserByUsernameWithStatus(
   username: string,
-): Promise<(SafeUser & UserStatus) | null> {
+): Promise<UserWithStatus | null> {
   const user = await getUserByUsername(username);
   if (!user) {
     return null;
@@ -76,7 +77,8 @@ export async function getSafeUserByUsernameWithStatus(
 
   let status = await getUserStatus(user.id);
 
-  // If status doesn't exist, create it with default values
+  // If status doesn't exist, create it with default values.
+  // We will exclude status.createdAt and status.updatedAt below, so they don't overwrite the user's fields.
   if (!status) {
     await createUserStatus(user.id, { role: "user" });
     status = await getUserStatus(user.id);
@@ -87,9 +89,14 @@ export async function getSafeUserByUsernameWithStatus(
     }
   }
 
-  // biome-ignore lint/correctness/noUnusedVariables: _id is used to avoid type errors
+  // Omit password, updatedAt, and id from user to construct safeUser.
+  // Also omit createdAt and updatedAt from status to prevent accidental collision with user fields.
+  // Note: This ensures status's createdAt/updatedAt don't overwrite the user's actual times.
   const { password, updatedAt, id: _id, ...safeUser } = user;
-  return { ...safeUser, ...status };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { createdAt: _statusCreatedAt, updatedAt: _statusUpdatedAt, ...safeStatus } = status;
+
+  return { ...safeUser, ...safeStatus };
 }
 
 export async function updateUserProfile(updatePayload: UserProfileSubmission) {

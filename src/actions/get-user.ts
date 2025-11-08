@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSafeUserByUsernameWithStatus } from "@/services/user";
 import { z } from "zod";
-import type { SafeUser, UserStatus } from "@/schemas/db/schema";
+import type { UserWithStatus } from "@/types/users";
 import { getUserBadges } from "@/services/badges";
 import { logger } from "@/lib/logger";
 
@@ -43,6 +43,6 @@ export const getUserByUsernameWithStatusAndBadgesFn = createServerFn({
       userWithStatus: {
         ...userWithStatus,
         badges: userBadges,
-      } as SafeUser & UserStatus & { badges: typeof userBadges },
+      } as UserWithStatus & { badges: typeof userBadges },
     };
   });
