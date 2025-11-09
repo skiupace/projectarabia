@@ -15,7 +15,7 @@ export const Route = createFileRoute("/user/$username")({
 function RouteComponent() {
   const { result } = Route.useLoaderData();
 
-  if (!result || !result.userWithStatus) {
+  if (!result || !result.SafeUserWithStatus) {
     return (
       <div className="w-full max-w-4xl mx-auto px-2 py-8">
         <p className="text-center text-zinc-500 font-mono text-sm">
@@ -25,5 +25,5 @@ function RouteComponent() {
     );
   }
 
-  return <UserDetail user={result.userWithStatus} />;
+  return <UserDetail user={result.SafeUserWithStatus} />;
 }

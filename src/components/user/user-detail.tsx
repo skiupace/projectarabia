@@ -22,7 +22,7 @@ import {
   banUserFn,
   unbanUserFn,
 } from "@/actions/admin-mod";
-import type { UserWithStatus } from "@/types/users";
+import type { SafeUserWithStatus } from "@/types/users";
 
 // Adapter to convert ValidationResult to TanStack Form error format
 const toFormError = (result: ValidationResult): string | undefined => {
@@ -32,7 +32,7 @@ const toFormError = (result: ValidationResult): string | undefined => {
 export function UserDetail({
   user: _user,
 }: {
-  user: UserWithStatus & { badges: UserBadgeWithMetadata[] };
+  user: SafeUserWithStatus & { badges: UserBadgeWithMetadata[] };
 }) {
   const { user: currentUser } = useAuth();
   const isOwnProfile = currentUser?.username === _user?.username;

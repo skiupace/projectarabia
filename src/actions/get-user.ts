@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSafeUserByUsernameWithStatus } from "@/services/user";
 import { z } from "zod";
-import type { UserWithStatus } from "@/types/users";
+import type { SafeUserWithStatus } from "@/types/users";
 import { getUserBadges } from "@/services/badges";
 import { logger } from "@/lib/logger";
 
@@ -18,8 +18,8 @@ export const getUserByUsernameWithStatusAndBadgesFn = createServerFn({
       tag: "getUserByUsernameWithStatusAndBadgesFn",
       username: data.username,
     });
-    const userWithStatus = await getSafeUserByUsernameWithStatus(data.username);
-    if (!userWithStatus) {
+    const SafeUserWithStatus = await getSafeUserByUsernameWithStatus(data.username);
+    if (!SafeUserWithStatus) {
       logger.warn("getUserByUsernameWithStatusAndBadgesFn", {
         tag: "getUserByUsernameWithStatusAndBadgesFn",
         action: "user_not_found",
@@ -31,18 +31,18 @@ export const getUserByUsernameWithStatusAndBadgesFn = createServerFn({
         errorCode: "USER_NOT_FOUND_ERROR",
       };
     }
-    const userBadges = await getUserBadges(userWithStatus.userId);
+    const userBadges = await getUserBadges(SafeUserWithStatus.userId);
     logger.debug("getUserByUsernameWithStatusAndBadgesFn", {
       tag: "getUserByUsernameWithStatusAndBadgesFn",
       action: "success",
-      userId: userWithStatus.userId,
+      userId: SafeUserWithStatus.userId,
       username: data.username,
       badgesCount: userBadges.length,
     });
     return {
-      userWithStatus: {
-        ...userWithStatus,
+      SafeUserWithStatus: {
+        ...SafeUserWithStatus,
         badges: userBadges,
-      } as UserWithStatus & { badges: typeof userBadges },
+      } as SafeUserWithStatus & { badges: typeof userBadges },
     };
   });

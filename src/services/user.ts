@@ -18,7 +18,7 @@ import { upsertVerification } from "./verifications";
 import { validateTurnstile } from "./cloudflare";
 import { revokeBadge } from "./badges";
 import { BadgeId } from "@/enum/badges";
-import type { UserWithStatus } from "@/types/users";
+import type { SafeUserWithStatus } from "@/types/users";
 
 async function getUserByUsername(username: string): Promise<User | null> {
   // Validate username
@@ -69,7 +69,7 @@ export async function getSafeUserByIdWithStatus(
 
 export async function getSafeUserByUsernameWithStatus(
   username: string,
-): Promise<UserWithStatus | null> {
+): Promise<SafeUserWithStatus | null> {
   const user = await getUserByUsername(username);
   if (!user) {
     return null;
