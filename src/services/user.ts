@@ -92,6 +92,7 @@ export async function getSafeUserByUsernameWithStatus(
   // Omit password, updatedAt, and id from user to construct safeUser.
   // Also omit createdAt and updatedAt from status to prevent accidental collision with user fields.
   // Note: This ensures status's createdAt/updatedAt don't overwrite the user's actual times.
+  // biome-ignore lint/correctness/noUnusedVariables: omit password, updatedAt, and id from user to construct safeUser.
   const { password, updatedAt, id: _id, ...safeUser } = user;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {

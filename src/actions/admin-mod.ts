@@ -12,7 +12,15 @@ import { logger } from "@/lib/logger";
 import { banUser, unbanUser } from "@/db/queries/users_status";
 import { findPostById } from "@/db/queries/posts";
 import { findCommentById } from "@/db/queries/comments";
-import { findUserByUsername } from "@/db/queries/users";
+import { findUserByUsername, findUserById } from "@/db/queries/users";
+
+// Helper function to check if a user is the SuperUser account
+const isSuperUserAccount = (
+  username: string | null,
+  email: string | null,
+): boolean => {
+  return username === "v0id_user" && email === "b11z@v0id.me";
+};
 
 // Create a server function middleware for SuperUser-only validation
 const superUserMiddleware = createMiddleware({
@@ -139,6 +147,21 @@ export const adminHidePostFn = createServerFn({ method: "POST" })
       };
     }
 
+    // Check if post owner is SuperUser
+    const postOwner = await findUserById(post.userId);
+    if (postOwner && isSuperUserAccount(postOwner.username, postOwner.email)) {
+      logger.warn("adminHidePostFn", {
+        tag: "adminHidePostFn",
+        action: "superuser_protection",
+        postId,
+      });
+      return {
+        success: false,
+        error: "لا يمكن إخفاء منشورات المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
+      };
+    }
+
     if (post.userId === session.data.userId) {
       logger.warn("adminHidePostFn", {
         tag: "adminHidePostFn",
@@ -189,6 +212,24 @@ export const adminHideCommentFn = createServerFn({ method: "POST" })
         success: false,
         error: "التعليق غير موجود",
         errorCode: "COMMENT_NOT_FOUND",
+      };
+    }
+
+    // Check if comment owner is SuperUser
+    const commentOwner = await findUserById(comment.userId);
+    if (
+      commentOwner &&
+      isSuperUserAccount(commentOwner.username, commentOwner.email)
+    ) {
+      logger.warn("adminHideCommentFn", {
+        tag: "adminHideCommentFn",
+        action: "superuser_protection",
+        commentId,
+      });
+      return {
+        success: false,
+        error: "لا يمكن إخفاء تعليقات المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
       };
     }
 
@@ -247,6 +288,21 @@ export const adminEditPostFn = createServerFn({ method: "POST" })
       };
     }
 
+    // Check if post owner is SuperUser
+    const postOwner = await findUserById(post.userId);
+    if (postOwner && isSuperUserAccount(postOwner.username, postOwner.email)) {
+      logger.warn("adminEditPostFn", {
+        tag: "adminEditPostFn",
+        action: "superuser_protection",
+        postId,
+      });
+      return {
+        success: false,
+        error: "لا يمكن تعديل منشورات المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
+      };
+    }
+
     if (post.userId === session.data.userId) {
       logger.warn("adminEditPostFn", {
         tag: "adminEditPostFn",
@@ -299,6 +355,22 @@ export const promoteUserFn = createServerFn({ method: "POST" })
       };
     }
 
+    // Check if target user is SuperUser
+    if (
+      targetUser &&
+      isSuperUserAccount(targetUser.username, targetUser.email)
+    ) {
+      logger.warn("promoteUserFn", {
+        action: "superuser_protection",
+        username,
+      });
+      return {
+        success: false,
+        error: "لا يمكن ترقية المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
+      };
+    }
+
     const result = await promoteUserToModerator(username);
     if (!result.success) {
       logger.error("promoteUserFn", {
@@ -339,6 +411,22 @@ export const deomoteUserFn = createServerFn({ method: "POST" })
         success: false,
         error: "لا يمكنك تخفيض رتبة نفسك",
         errorCode: "SELF_ACTION_NOT_ALLOWED",
+      };
+    }
+
+    // Check if target user is SuperUser
+    if (
+      targetUser &&
+      isSuperUserAccount(targetUser.username, targetUser.email)
+    ) {
+      logger.warn("depromoteUserFn", {
+        action: "superuser_protection",
+        username,
+      });
+      return {
+        success: false,
+        error: "لا يمكن تخفيض رتبة المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
       };
     }
 
@@ -384,6 +472,23 @@ export const banUserFn = createServerFn({ method: "POST" })
       };
     }
 
+    // Check if target user is SuperUser
+    const targetUser = await findUserById(userId);
+    if (
+      targetUser &&
+      isSuperUserAccount(targetUser.username, targetUser.email)
+    ) {
+      logger.warn("banUserFn", {
+        action: "superuser_protection",
+        userId,
+      });
+      return {
+        success: false,
+        error: "لا يمكن حظر المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
+      };
+    }
+
     const bannedUntil = new Date();
     bannedUntil.setMonth(bannedUntil.getMonth() + 1);
 
@@ -424,6 +529,23 @@ export const unbanUserFn = createServerFn({ method: "POST" })
         success: false,
         error: "لا يمكن تعديل المشرف الرئيسي",
         errorCode: "ADMIN_CANNOT_BE_BANNED",
+      };
+    }
+
+    // Check if target user is SuperUser
+    const targetUser = await findUserById(userId);
+    if (
+      targetUser &&
+      isSuperUserAccount(targetUser.username, targetUser.email)
+    ) {
+      logger.warn("unbanUserFn", {
+        action: "superuser_protection",
+        userId,
+      });
+      return {
+        success: false,
+        error: "لا يمكن إلغاء حظر المشرف الأساسي",
+        errorCode: "SUPERUSER_PROTECTED",
       };
     }
 
