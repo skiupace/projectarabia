@@ -93,7 +93,7 @@ export function UserDetail({
       data: { username: _user?.username },
     });
     if (!response.success) {
-      setServerError(response.error || "حدث خطأ أثناء تخفيض المستخدم");
+      setServerError(response.error ?? "حدث خطأ أثناء تخفيض المستخدم");
       return;
     }
     setSuccessMessage("تم تخفيض المستخدم بنجاح");
@@ -414,12 +414,6 @@ export function UserDetail({
           {/* Profile Actions */}
           {_user?.username && (
             <div className="flex flex-col gap-1 text-xs">
-              <Link
-                to="/password/change"
-                className="text-gray-600 underline hover:text-[#006CFF]"
-              >
-                تغيير كلمة المرور
-              </Link>
               <Link
                 to="/posts/$username"
                 params={{ username: _user.username }}

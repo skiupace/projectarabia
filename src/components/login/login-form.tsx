@@ -7,7 +7,6 @@ import {
 } from "@/schemas/auth/login";
 import { useForm } from "@tanstack/react-form";
 import { useRef } from "react";
-import { Link } from "@tanstack/react-router";
 import {
   validateUsername,
   validatePassword,
@@ -196,14 +195,6 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
             }}
           />
         </form>
-        <div className="mt-2">
-          <Link
-            to="/reset-password"
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            نسيت كلمة المرور؟
-          </Link>
-        </div>
       </div>
 
       {/* Register Form */}

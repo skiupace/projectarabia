@@ -18,7 +18,9 @@ export const getUserByUsernameWithStatusAndBadgesFn = createServerFn({
       tag: "getUserByUsernameWithStatusAndBadgesFn",
       username: data.username,
     });
-    const SafeUserWithStatus = await getSafeUserByUsernameWithStatus(data.username);
+    const SafeUserWithStatus = await getSafeUserByUsernameWithStatus(
+      data.username,
+    );
     if (!SafeUserWithStatus) {
       logger.warn("getUserByUsernameWithStatusAndBadgesFn", {
         tag: "getUserByUsernameWithStatusAndBadgesFn",

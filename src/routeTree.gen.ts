@@ -17,7 +17,6 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareIndexRouteImport } from './routes/share/index'
-import { Route as ResetPasswordIndexRouteImport } from './routes/reset-password/index'
 import { Route as PostIndexRouteImport } from './routes/post/index'
 import { Route as PastIndexRouteImport } from './routes/past/index'
 import { Route as NewestIndexRouteImport } from './routes/newest/index'
@@ -29,7 +28,6 @@ import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
 import { Route as UserUsernameRouteImport } from './routes/user/$username'
 import { Route as PostsUsernameRouteImport } from './routes/posts/$username'
 import { Route as PastMonthRouteImport } from './routes/past/$month'
-import { Route as PasswordChangeRouteImport } from './routes/password/change'
 import { Route as CommentsUsernameRouteImport } from './routes/comments/$username'
 import { Route as PutAdminSecretRouteImport } from './routes/put.admin.secret'
 import { Route as PostIPostIdRouteImport } from './routes/post/i.$postId'
@@ -73,11 +71,6 @@ const IndexRoute = IndexRouteImport.update({
 const ShareIndexRoute = ShareIndexRouteImport.update({
   id: '/share/',
   path: '/share/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordIndexRoute = ResetPasswordIndexRouteImport.update({
-  id: '/reset-password/',
-  path: '/reset-password/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostIndexRoute = PostIndexRouteImport.update({
@@ -135,11 +128,6 @@ const PastMonthRoute = PastMonthRouteImport.update({
   path: '/past/$month',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PasswordChangeRoute = PasswordChangeRouteImport.update({
-  id: '/password/change',
-  path: '/password/change',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CommentsUsernameRoute = CommentsUsernameRouteImport.update({
   id: '/comments/$username',
   path: '/comments/$username',
@@ -170,7 +158,6 @@ export interface FileRoutesByFullPath {
   '/security': typeof SecurityRoute
   '/tips': typeof TipsRoute
   '/comments/$username': typeof CommentsUsernameRoute
-  '/password/change': typeof PasswordChangeRoute
   '/past/$month': typeof PastMonthRoute
   '/posts/$username': typeof PostsUsernameRoute
   '/user/$username': typeof UserUsernameRoute
@@ -182,7 +169,6 @@ export interface FileRoutesByFullPath {
   '/newest': typeof NewestIndexRoute
   '/past': typeof PastIndexRoute
   '/post': typeof PostIndexRoute
-  '/reset-password': typeof ResetPasswordIndexRoute
   '/share': typeof ShareIndexRoute
   '/post/e/$postId': typeof PostEPostIdRoute
   '/post/i/$postId': typeof PostIPostIdRoute
@@ -197,7 +183,6 @@ export interface FileRoutesByTo {
   '/security': typeof SecurityRoute
   '/tips': typeof TipsRoute
   '/comments/$username': typeof CommentsUsernameRoute
-  '/password/change': typeof PasswordChangeRoute
   '/past/$month': typeof PastMonthRoute
   '/posts/$username': typeof PostsUsernameRoute
   '/user/$username': typeof UserUsernameRoute
@@ -209,7 +194,6 @@ export interface FileRoutesByTo {
   '/newest': typeof NewestIndexRoute
   '/past': typeof PastIndexRoute
   '/post': typeof PostIndexRoute
-  '/reset-password': typeof ResetPasswordIndexRoute
   '/share': typeof ShareIndexRoute
   '/post/e/$postId': typeof PostEPostIdRoute
   '/post/i/$postId': typeof PostIPostIdRoute
@@ -225,7 +209,6 @@ export interface FileRoutesById {
   '/security': typeof SecurityRoute
   '/tips': typeof TipsRoute
   '/comments/$username': typeof CommentsUsernameRoute
-  '/password/change': typeof PasswordChangeRoute
   '/past/$month': typeof PastMonthRoute
   '/posts/$username': typeof PostsUsernameRoute
   '/user/$username': typeof UserUsernameRoute
@@ -237,7 +220,6 @@ export interface FileRoutesById {
   '/newest/': typeof NewestIndexRoute
   '/past/': typeof PastIndexRoute
   '/post/': typeof PostIndexRoute
-  '/reset-password/': typeof ResetPasswordIndexRoute
   '/share/': typeof ShareIndexRoute
   '/post/e/$postId': typeof PostEPostIdRoute
   '/post/i/$postId': typeof PostIPostIdRoute
@@ -254,7 +236,6 @@ export interface FileRouteTypes {
     | '/security'
     | '/tips'
     | '/comments/$username'
-    | '/password/change'
     | '/past/$month'
     | '/posts/$username'
     | '/user/$username'
@@ -266,7 +247,6 @@ export interface FileRouteTypes {
     | '/newest'
     | '/past'
     | '/post'
-    | '/reset-password'
     | '/share'
     | '/post/e/$postId'
     | '/post/i/$postId'
@@ -281,7 +261,6 @@ export interface FileRouteTypes {
     | '/security'
     | '/tips'
     | '/comments/$username'
-    | '/password/change'
     | '/past/$month'
     | '/posts/$username'
     | '/user/$username'
@@ -293,7 +272,6 @@ export interface FileRouteTypes {
     | '/newest'
     | '/past'
     | '/post'
-    | '/reset-password'
     | '/share'
     | '/post/e/$postId'
     | '/post/i/$postId'
@@ -308,7 +286,6 @@ export interface FileRouteTypes {
     | '/security'
     | '/tips'
     | '/comments/$username'
-    | '/password/change'
     | '/past/$month'
     | '/posts/$username'
     | '/user/$username'
@@ -320,7 +297,6 @@ export interface FileRouteTypes {
     | '/newest/'
     | '/past/'
     | '/post/'
-    | '/reset-password/'
     | '/share/'
     | '/post/e/$postId'
     | '/post/i/$postId'
@@ -336,7 +312,6 @@ export interface RootRouteChildren {
   SecurityRoute: typeof SecurityRoute
   TipsRoute: typeof TipsRoute
   CommentsUsernameRoute: typeof CommentsUsernameRoute
-  PasswordChangeRoute: typeof PasswordChangeRoute
   PastMonthRoute: typeof PastMonthRoute
   PostsUsernameRoute: typeof PostsUsernameRoute
   UserUsernameRoute: typeof UserUsernameRoute
@@ -348,7 +323,6 @@ export interface RootRouteChildren {
   NewestIndexRoute: typeof NewestIndexRoute
   PastIndexRoute: typeof PastIndexRoute
   PostIndexRoute: typeof PostIndexRoute
-  ResetPasswordIndexRoute: typeof ResetPasswordIndexRoute
   ShareIndexRoute: typeof ShareIndexRoute
   PostEPostIdRoute: typeof PostEPostIdRoute
   PostIPostIdRoute: typeof PostIPostIdRoute
@@ -411,13 +385,6 @@ declare module '@tanstack/react-router' {
       path: '/share'
       fullPath: '/share'
       preLoaderRoute: typeof ShareIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password/': {
-      id: '/reset-password/'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/post/': {
@@ -497,13 +464,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PastMonthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/password/change': {
-      id: '/password/change'
-      path: '/password/change'
-      fullPath: '/password/change'
-      preLoaderRoute: typeof PasswordChangeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/comments/$username': {
       id: '/comments/$username'
       path: '/comments/$username'
@@ -544,7 +504,6 @@ const rootRouteChildren: RootRouteChildren = {
   SecurityRoute: SecurityRoute,
   TipsRoute: TipsRoute,
   CommentsUsernameRoute: CommentsUsernameRoute,
-  PasswordChangeRoute: PasswordChangeRoute,
   PastMonthRoute: PastMonthRoute,
   PostsUsernameRoute: PostsUsernameRoute,
   UserUsernameRoute: UserUsernameRoute,
@@ -556,7 +515,6 @@ const rootRouteChildren: RootRouteChildren = {
   NewestIndexRoute: NewestIndexRoute,
   PastIndexRoute: PastIndexRoute,
   PostIndexRoute: PostIndexRoute,
-  ResetPasswordIndexRoute: ResetPasswordIndexRoute,
   ShareIndexRoute: ShareIndexRoute,
   PostEPostIdRoute: PostEPostIdRoute,
   PostIPostIdRoute: PostIPostIdRoute,
