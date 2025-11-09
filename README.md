@@ -77,5 +77,5 @@ bun run dev
 
 ## License & Credits
 
-MIT License.
+AGPL-3.0 License.
 Built by [#V0ID](https://v0id.me) — powered by curiosity, caffeine, and the edge.

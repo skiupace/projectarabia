@@ -20,7 +20,7 @@
       "custom_domain": true
     },
     {
-      "pattern": "*.b11z.news/*",
+      "pattern": "b11z.news/*",
       "zone_id": "95646d20d7675139119e47fe4e619b7c"
     }
   ],
