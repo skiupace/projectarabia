@@ -16,7 +16,12 @@ import { timeAgo, timeUntil } from "@/lib/time";
 import { updateUserProfileFn } from "@/actions/user-submit";
 import type { UserBadgeWithMetadata } from "@/types/badges";
 import { BadgeList } from "../badge";
-import { promoteUserFn, deomoteUserFn, banUserFn } from "@/actions/admin-mod";
+import {
+  promoteUserFn,
+  deomoteUserFn,
+  banUserFn,
+  unbanUserFn,
+} from "@/actions/admin-mod";
 import type { UserWithStatus } from "@/types/users";
 
 // Adapter to convert ValidationResult to TanStack Form error format
@@ -109,6 +114,18 @@ export function UserDetail({
     window.location.reload();
   };
 
+  const handleUnbanUser = async () => {
+    const response = await unbanUserFn({ data: { userId: _user?.userId } });
+    if (!response.success) {
+      setServerError(response.error || "حدث خطأ أثناء إلغاء حظر المستخدم");
+      return;
+    }
+    setSuccessMessage("تم إلغاء حظر المستخدم بنجاح");
+
+    // Hard reload the page to reflect changes
+    window.location.reload();
+  };
+
   const profileForm = useForm({
     ...userProfileFormOpts,
     defaultValues: {
@@ -164,13 +181,23 @@ export function UserDetail({
                     تخفيض المستخدم
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
-                  onClick={handleBanUser}
-                >
-                  حظر المستخدم لمدة شهر
-                </button>
+                {isBanned ? (
+                  <button
+                    type="button"
+                    className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                    onClick={handleUnbanUser}
+                  >
+                    فك الحظر عن المستخدم
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="text-gray-600 underline hover:text-[#006CFF] cursor-pointer"
+                    onClick={handleBanUser}
+                  >
+                    حظر المستخدم لمدة شهر
+                  </button>
+                )}
               </div>
             )}
             <div className="flex gap-2">

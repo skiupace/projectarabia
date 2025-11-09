@@ -9,19 +9,19 @@ import {
   getSafeUserByIdWithStatus,
 } from "@/services/user";
 import { logger } from "@/lib/logger";
-import { banUser } from "@/db/queries/users_status";
+import { banUser, unbanUser } from "@/db/queries/users_status";
 import { findPostById } from "@/db/queries/posts";
 import { findCommentById } from "@/db/queries/comments";
 import { findUserByUsername } from "@/db/queries/users";
 
-// Create a server function middleware for moderator/admin validation
-const roleValidationMiddleware = createMiddleware({
+// Create a server function middleware for SuperUser-only validation
+const superUserMiddleware = createMiddleware({
   type: "function",
 }).server(async ({ next }) => {
   const session = await useAppSession();
   if (!session.data?.userId) {
-    logger.warn("roleValidationMiddleware", {
-      tag: "roleValidationMiddleware",
+    logger.warn("superUserMiddleware", {
+      tag: "superUserMiddleware",
       action: "unauthorized",
     });
     throw new Error("يجب تسجيل الدخول للتعديل");
@@ -31,23 +31,23 @@ const roleValidationMiddleware = createMiddleware({
 
   // Check if user exists
   if (!user) {
-    logger.warn("roleValidationMiddleware", {
-      tag: "roleValidationMiddleware",
+    logger.warn("superUserMiddleware", {
+      tag: "superUserMiddleware",
       action: "user_not_found",
       userId: session.data.userId,
     });
     throw new Error("المستخدم غير موجود");
   }
 
-  // Verify user is the main admin
-  const isMainAdmin =
+  // Verify user is the SuperUser
+  const isSuperUser =
     user.username === "v0id_user" &&
     user.email === "b11z@v0id.me" &&
     user.verified === true;
 
-  if (!isMainAdmin) {
-    logger.warn("roleValidationMiddleware", {
-      tag: "roleValidationMiddleware",
+  if (!isSuperUser) {
+    logger.warn("superUserMiddleware", {
+      tag: "superUserMiddleware",
       action: "insufficient_permissions",
       userId: session.data.userId,
       username: user.username,
@@ -57,11 +57,69 @@ const roleValidationMiddleware = createMiddleware({
     throw new Error("ليس لديك صلاحيات التعديل");
   }
 
-  return next();
+  return next({
+    context: {
+      isSuperUser: true,
+    },
+  });
+});
+
+// Create a server function middleware for moderator validation (moderators + SuperUser)
+const moderatorMiddleware = createMiddleware({
+  type: "function",
+}).server(async ({ next }) => {
+  const session = await useAppSession();
+  if (!session.data?.userId) {
+    logger.warn("moderatorMiddleware", {
+      tag: "moderatorMiddleware",
+      action: "unauthorized",
+    });
+    throw new Error("يجب تسجيل الدخول للتعديل");
+  }
+
+  const user = await getSafeUserByIdWithStatus(session.data.userId);
+
+  // Check if user exists
+  if (!user) {
+    logger.warn("moderatorMiddleware", {
+      tag: "moderatorMiddleware",
+      action: "user_not_found",
+      userId: session.data.userId,
+    });
+    throw new Error("المستخدم غير موجود");
+  }
+
+  // Check if user is SuperUser
+  const isSuperUser =
+    user.username === "v0id_user" &&
+    user.email === "b11z@v0id.me" &&
+    user.verified === true;
+
+  // Check if user is moderator
+  const isModerator = user.role === "moderator";
+
+  // User must be either SuperUser or moderator
+  if (!isSuperUser && !isModerator) {
+    logger.warn("moderatorMiddleware", {
+      tag: "moderatorMiddleware",
+      action: "insufficient_permissions",
+      userId: session.data.userId,
+      username: user.username,
+      role: user.role,
+    });
+    throw new Error("ليس لديك صلاحيات التعديل");
+  }
+
+  return next({
+    context: {
+      isSuperUser,
+      isModerator,
+    },
+  });
 });
 
 export const adminHidePostFn = createServerFn({ method: "POST" })
-  .middleware([roleValidationMiddleware])
+  .middleware([moderatorMiddleware])
   .inputValidator((data: { postId: string; reason: string }) => data)
   .handler(async ({ data }) => {
     const { postId, reason } = data;
@@ -114,7 +172,7 @@ export const adminHidePostFn = createServerFn({ method: "POST" })
   });
 
 export const adminHideCommentFn = createServerFn({ method: "POST" })
-  .middleware([roleValidationMiddleware])
+  .middleware([moderatorMiddleware])
   .inputValidator((data: { commentId: string }) => data)
   .handler(async ({ data }) => {
     const { commentId } = data;
@@ -167,7 +225,7 @@ export const adminHideCommentFn = createServerFn({ method: "POST" })
   });
 
 export const adminEditPostFn = createServerFn({ method: "POST" })
-  .middleware([roleValidationMiddleware])
+  .middleware([moderatorMiddleware])
   .inputValidator(
     (data: PostSubmition & { postId: string; reason: string }) => data,
   )
@@ -222,22 +280,11 @@ export const adminEditPostFn = createServerFn({ method: "POST" })
   });
 
 export const promoteUserFn = createServerFn({ method: "POST" })
+  .middleware([superUserMiddleware])
   .inputValidator((data: { username: string }) => data)
   .handler(async ({ data }) => {
     const { username } = data;
     const session = await useAppSession();
-
-    if (session.data?.moderator !== true) {
-      logger.warn("promoteUserFn", {
-        action: "invalid_secret_key",
-        username,
-      });
-      return {
-        success: false,
-        error: "المفتاح السري غير صحيح",
-        errorCode: "INVALID_SECRET_KEY",
-      };
-    }
 
     const targetUser = await findUserByUsername(username);
     if (targetUser?.id === session.data.userId) {
@@ -276,22 +323,11 @@ export const promoteUserFn = createServerFn({ method: "POST" })
   });
 
 export const deomoteUserFn = createServerFn({ method: "POST" })
+  .middleware([superUserMiddleware])
   .inputValidator((data: { username: string }) => data)
   .handler(async ({ data }) => {
     const { username } = data;
     const session = await useAppSession();
-
-    if (session.data?.moderator !== true) {
-      logger.warn("depromoteUserFn", {
-        action: "invalid_secret_key",
-        username,
-      });
-      return {
-        success: false,
-        error: "المفتاح السري غير صحيح",
-        errorCode: "INVALID_SECRET_KEY",
-      };
-    }
 
     const targetUser = await findUserByUsername(username);
     if (targetUser?.id === session.data.userId) {
@@ -330,7 +366,7 @@ export const deomoteUserFn = createServerFn({ method: "POST" })
   });
 
 export const banUserFn = createServerFn({ method: "POST" })
-  .middleware([roleValidationMiddleware])
+  .middleware([superUserMiddleware])
   .inputValidator((data: { userId: string }) => data)
   .handler(async ({ data }) => {
     const { userId } = data;
@@ -366,6 +402,42 @@ export const banUserFn = createServerFn({ method: "POST" })
     }
 
     logger.info("banUserFn", { action: "success", userId });
+    return {
+      success: true,
+      userId,
+    };
+  });
+
+export const unbanUserFn = createServerFn({ method: "POST" })
+  .middleware([superUserMiddleware])
+  .inputValidator((data: { userId: string }) => data)
+  .handler(async ({ data }) => {
+    const { userId } = data;
+    const session = await useAppSession();
+
+    if (userId === session.data.userId) {
+      logger.error("unbanUserFn", {
+        action: "admin_cannot_ban_self",
+        userId,
+      });
+      return {
+        success: false,
+        error: "لا يمكن تعديل المشرف الرئيسي",
+        errorCode: "ADMIN_CANNOT_BE_BANNED",
+      };
+    }
+
+    const result = await unbanUser(userId);
+
+    if (!result.success) {
+      logger.error("unbanUserFn", { userId, error: result.error });
+      return {
+        success: false,
+        error: result.error,
+      };
+    }
+
+    logger.info("unbanUserFn", { action: "success", userId });
     return {
       success: true,
       userId,
