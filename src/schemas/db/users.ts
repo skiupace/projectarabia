@@ -1,12 +1,12 @@
 import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 
 export const users = sqliteTable(
   "users",
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     username: text("username").notNull(),
     email: text("email"),
     password: text("password").notNull(),

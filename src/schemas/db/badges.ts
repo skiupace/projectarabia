@@ -1,5 +1,5 @@
 import { sqliteTable, text, index } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 
 // Table to store which user has which badge (badge ID is just text, metadata comes from BADGE_METADATA)
@@ -8,7 +8,7 @@ export const userBadges = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

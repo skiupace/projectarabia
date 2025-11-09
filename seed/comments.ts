@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { comments } from "../src/schemas/db/comments";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 
 type CommentData = {
   id: string;
@@ -91,20 +91,20 @@ export async function seedComments(
   userIds: string[]
 ) {
   console.log("🌱 Seeding comments...");
-  
+
   const commentCount = 500;
   const commentsData: CommentData[] = [];
   const createdCommentIds: string[] = [];
-  
+
   // First, create top-level comments (70% of total)
   const topLevelCount = Math.floor(commentCount * 0.7);
-  
+
   for (let i = 0; i < topLevelCount; i++) {
-    const commentId = createId();
+    const commentId = nanoid();
     const postId = postIds[Math.floor(Math.random() * postIds.length)];
     const userId = userIds[Math.floor(Math.random() * userIds.length)];
     const text = allComments[Math.floor(Math.random() * allComments.length)];
-    
+
     // Random votes (realistic distribution)
     let votes = 0;
     const rand = Math.random();
@@ -117,12 +117,12 @@ export async function seedComments(
     } else {
       votes = Math.floor(Math.random() * 50) + 33; // 3% have 33-82 votes
     }
-    
+
     // Random dates (should be after post creation, but for simplicity we'll use recent dates)
     const hoursAgo = Math.floor(Math.random() * 24 * 180); // Within last 180 days
     const createdAt = new Date();
     createdAt.setHours(createdAt.getHours() - hoursAgo);
-    
+
     commentsData.push({
       id: commentId,
       postId,
@@ -136,31 +136,31 @@ export async function seedComments(
       createdAt: createdAt.toISOString(),
       updatedAt: createdAt.toISOString(),
     });
-    
+
     createdCommentIds.push(commentId);
   }
-  
+
   // Now create nested comments (30% of total)
   const nestedCount = commentCount - topLevelCount;
-  
+
   for (let i = 0; i < nestedCount; i++) {
-    const commentId = createId();
-    
+    const commentId = nanoid();
+
     // Pick a random parent comment
     const parentCommentIndex = Math.floor(Math.random() * commentsData.length);
     const selectedParent = commentsData[parentCommentIndex];
     if (!selectedParent) continue;
-    
+
     const { postId, id: parentId, createdAt: parentCreatedAtStr } = selectedParent;
-    
+
     const userId = userIds[Math.floor(Math.random() * userIds.length)]!;
-    
+
     // Use shorter replies for nested comments
     const useShortReply = Math.random() < 0.6;
     const text = useShortReply
       ? shortReplies[Math.floor(Math.random() * shortReplies.length)]
       : allComments[Math.floor(Math.random() * allComments.length)];
-    
+
     // Nested comments typically have fewer votes
     let votes = 0;
     const rand = Math.random();
@@ -171,18 +171,18 @@ export async function seedComments(
     } else {
       votes = Math.floor(Math.random() * 15) + 7; // 10% have 7-21 votes
     }
-    
+
     // Nested comments should be created after parent comment
     const parentCreatedAt = new Date(parentCreatedAtStr);
     const hoursAfterParent = Math.floor(Math.random() * 24 * 7); // Within 7 days after parent
     const createdAt = new Date(parentCreatedAt);
     createdAt.setHours(createdAt.getHours() + hoursAfterParent);
-    
+
     // Make sure it's not in the future
     if (createdAt > new Date()) {
       createdAt.setTime(new Date().getTime() - Math.random() * 24 * 60 * 60 * 1000);
     }
-    
+
     commentsData.push({
       id: commentId,
       postId,
@@ -197,9 +197,9 @@ export async function seedComments(
       updatedAt: createdAt.toISOString(),
     });
   }
-  
+
   await db.insert(comments).values(commentsData);
-  
+
   console.log(`✅ Created ${commentCount} comments (${topLevelCount} top-level, ${nestedCount} nested replies)`);
   return commentsData;
 }

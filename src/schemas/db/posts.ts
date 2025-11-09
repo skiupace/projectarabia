@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 
 export const posts = sqliteTable(
@@ -7,7 +7,7 @@ export const posts = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     title: text("title").notNull(),
     url: text("url"), // optional - for link posts
     text: text("text"), // optional - for text/ask posts

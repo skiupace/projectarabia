@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 import { posts } from "./posts";
 
@@ -8,7 +8,7 @@ export const comments = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     postId: text("post_id")
       .notNull()
       .references(() => posts.id),

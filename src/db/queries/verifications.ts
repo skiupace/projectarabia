@@ -2,7 +2,7 @@ import { db } from "@/schemas/db";
 import { verifications } from "@/schemas/db/schema";
 import type { Verification } from "@/schemas/db/schema";
 import { eq } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 
 // Upsert a verification: create new or update existing by userId
 export async function upsertVerification(
@@ -36,7 +36,7 @@ export async function upsertVerification(
   }
 
   // Create new verification
-  const id = createId();
+  const id = nanoid();
   await db.insert(verifications).values({ id, userId, token }).run();
 
   // Return the created verification

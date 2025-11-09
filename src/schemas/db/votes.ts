@@ -5,7 +5,7 @@ import {
   uniqueIndex,
   index,
 } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 import { posts } from "./posts";
 import { comments } from "./comments";
@@ -15,7 +15,7 @@ export const votes = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     userId: text("user_id")
       .notNull()
       .references(() => users.id),

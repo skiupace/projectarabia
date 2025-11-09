@@ -1,4 +1,4 @@
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import { users } from "./users";
 import { posts } from "./posts";
 import { comments } from "./comments";
@@ -10,7 +10,7 @@ export const reports = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     postId: text("post_id").references(() => posts.id),
     commentId: text("comment_id").references(() => comments.id),
     userId: text("user_id").references(() => users.id),

@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { users } from "../src/schemas/db/users";
 import { hashSync } from "bcryptjs";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 
 // Arabic poetic text about users themselves
 const arabicAboutTexts = [
@@ -59,54 +59,54 @@ const generateUsername = (index: number): string => {
     "rami", "mariam", "jamal", "noura", "fares", "hiba", "munir", "amal",
     "talal", "reem",
   ];
-  
-  const suffixes = ["", "_dev", "_writer", "_tech", "_poet", "_reader", 
+
+  const suffixes = ["", "_dev", "_writer", "_tech", "_poet", "_reader",
                     "_thinker", "_dreamer", "_coder", "_mind"];
-  
+
   // Use prefix from array or generate a simple one
   const prefix = prefixes[index % prefixes.length];
   const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
   const number = Math.random() > 0.7 ? Math.floor(Math.random() * 999) : "";
-  
+
   const username = `${prefix}${suffix}${number}`;
-  
+
   // Ensure it meets validation: 2-15 chars, starts with letter, lowercase alphanumeric + underscore
   if (username.length > 15) {
     return prefix + (number || "");
   }
-  
+
   return username;
 };
 
 export async function seedUsers(db: ReturnType<typeof drizzle>) {
   console.log("🌱 Seeding users...");
-  
+
   const userCount = 50;
   const usersData = [];
-  
+
   for (let i = 0; i < userCount; i++) {
     const username = generateUsername(i);
-    
+
     // Generate a valid password and hash it
     const password = hashSync("Password123", 10); // Valid: 8+ chars, uppercase, lowercase, number
-    
+
     // Optional email (70% of users have email)
     const hasEmail = Math.random() > 0.3;
     const email = hasEmail ? `${username}@example.com` : null;
-    
+
     // Optional about (80% of users have about)
     const hasAbout = Math.random() > 0.2;
-    const about = hasAbout 
+    const about = hasAbout
       ? allAboutTexts[Math.floor(Math.random() * allAboutTexts.length)]
       : null;
-    
+
     // Random dates in the past year
     const daysAgo = Math.floor(Math.random() * 365);
     const createdAt = new Date();
     createdAt.setDate(createdAt.getDate() - daysAgo);
-    
+
     usersData.push({
-      id: createId(),
+      id: nanoid(),
       username,
       email,
       password,
@@ -115,9 +115,9 @@ export async function seedUsers(db: ReturnType<typeof drizzle>) {
       updatedAt: createdAt.toISOString(),
     });
   }
-  
+
   await db.insert(users).values(usersData);
-  
+
   console.log(`✅ Created ${userCount} users`);
   return usersData;
 }

@@ -1,7 +1,7 @@
 import { db } from "@/schemas/db";
 import { userBadges, type UserBadge } from "@/schemas/db/schema";
 import { eq, and } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import type { BadgeId } from "@/enum/badges";
 import type { BadgeAwardResult } from "@/types/badges";
 
@@ -40,7 +40,7 @@ export async function addBadgeToUser(
   userId: string,
   badgeId: BadgeId,
 ): Promise<BadgeAwardResult> {
-  const id = createId();
+  const id = nanoid();
   await db
     .insert(userBadges)
     .values({

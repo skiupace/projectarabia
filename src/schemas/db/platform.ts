@@ -1,5 +1,5 @@
 import { sqliteTable, text, index } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 
 // This table is used to show banners in the platform when changes occur.
 // Types: "new_feature", "new_terms"
@@ -8,7 +8,7 @@ export const platform = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     updateType: text("update_type")
       .notNull()
       .$type<"new_feature" | "new_terms">(),

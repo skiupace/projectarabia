@@ -28,13 +28,24 @@
     {
       "binding": "arabia",
       "database_name": "arabia",
-      "database_id": "f4c8a778-cbad-4201-96f2-35f41ad800d0"
+      "database_id": "b069ff1d-7a47-462e-b1e6-0164062d0748"
     }
   ],
+  "env": {
+    "production": {
+      "vars": {
+        "DOMAIN": "b11z.news",
+      }
+    },
+    "development": {
+      "vars": {
+        "DOMAIN": "localhost:3000",
+      }
+    }
+  },
   "vars": {
     "SITE_KEY": "0x4AAAAAAB9fcOZ50et9DCar",
-    "DOMAIN": "localhost:3000",
-    "NODE_ENV": "development"
+    "CLOUDFLARE_DATABASE_ID": "b069ff1d-7a47-462e-b1e6-0164062d0748"
   },
   "kv_namespaces": [
     {

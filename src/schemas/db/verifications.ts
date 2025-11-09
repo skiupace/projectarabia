@@ -1,4 +1,4 @@
-import { createId } from "@paralleldrive/cuid2";
+import { nanoid } from "nanoid";
 import { index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { users } from "./users";
 
@@ -7,7 +7,7 @@ export const verifications = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => createId()),
+      .$defaultFn(() => nanoid()),
     userId: text("user_id")
       .notNull()
       .references(() => users.id),
