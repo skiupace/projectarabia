@@ -70,7 +70,9 @@ export function UserDetail({
   };
 
   const handlePromoteUser = async () => {
-    const response = await promoteUserFn({ data: { username: _user?.username  } });
+    const response = await promoteUserFn({
+      data: { username: _user?.username },
+    });
     if (!response.success) {
       setServerError("حدث خطأ أثناء ترقية المستخدم");
       return;
@@ -82,7 +84,9 @@ export function UserDetail({
   };
 
   const handleDepromoteUser = async () => {
-    const response = await deomoteUserFn({ data: { username: _user?.username  } });
+    const response = await deomoteUserFn({
+      data: { username: _user?.username },
+    });
     if (!response.success) {
       setServerError(response.error || "حدث خطأ أثناء تخفيض المستخدم");
       return;
@@ -94,7 +98,7 @@ export function UserDetail({
   };
 
   const handleBanUser = async () => {
-    const response = await banUserFn({ data: { userId: _user?.userId  } });
+    const response = await banUserFn({ data: { userId: _user?.userId } });
     if (!response.success) {
       setServerError(response.error || "حدث خطأ أثناء حظر المستخدم");
       return;
@@ -118,7 +122,8 @@ export function UserDetail({
   // If viewing someone else's profile
   if (!isOwnProfile) {
     const hasAbout = _user?.about && _user.about.length > 0;
-    const isBanned = _user?.bannedUntil && new Date(_user.bannedUntil) > new Date();
+    const isBanned =
+      _user?.bannedUntil && new Date(_user.bannedUntil) > new Date();
     return (
       <div className="max-w-2xl px-2 py-3 font-mono text-right" dir="rtl">
         <div className="flex flex-col gap-2">

@@ -94,7 +94,11 @@ export async function getSafeUserByUsernameWithStatus(
   // Note: This ensures status's createdAt/updatedAt don't overwrite the user's actual times.
   const { password, updatedAt, id: _id, ...safeUser } = user;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { createdAt: _statusCreatedAt, updatedAt: _statusUpdatedAt, ...safeStatus } = status;
+  const {
+    createdAt: _statusCreatedAt,
+    updatedAt: _statusUpdatedAt,
+    ...safeStatus
+  } = status;
 
   return { ...safeUser, ...safeStatus };
 }

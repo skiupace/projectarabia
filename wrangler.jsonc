@@ -3,54 +3,58 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "projectarabia",
-	"compatibility_date": "2025-09-02",
-	"keep_vars": true,
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
-	"main": "worker/index.ts",
-	"observability": {
-		"enabled": true
-	},
-	"routes": [
-		{
-		  "pattern": "b11z.news",
-		  "custom_domain": true
-		}
-	  ],
-	"d1_databases": [
-		{
-			"binding": "arabia",
-			"database_name": "arabia",
-			"database_id": "f4c8a778-cbad-4201-96f2-35f41ad800d0"
-		}
-	],
-	"vars": {
-		"SITE_KEY": "0x4AAAAAAB9fcOZ50et9DCar",
-		"DOMAIN": "localhost:3000",
-		"NODE_ENV": "development"
-	},
-	"kv_namespaces": [
-		{
-			"binding": "ARABIAN_KV",
-			"id": "425886aa915b4e5dac16d4831e632542"
-		}
-	],
-	"queues": {
-		"producers": [
-			{
-				"queue": "mailer",
-				"binding": "MAILER"
-			}
-		],
-		"consumers": [
-			{
-				"queue": "mailer",
-				"max_batch_size": 100, // 100 messages per batch
-				"max_batch_timeout": 5 // 5 seconds per batch
-			}
-		]
-	}
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "projectarabia",
+  "compatibility_date": "2025-09-02",
+  "keep_vars": true,
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "worker/index.ts",
+  "observability": {
+    "enabled": true
+  },
+  "routes": [
+    {
+      "pattern": "b11z.news",
+      "custom_domain": true
+    },
+    {
+      "pattern": "*.b11z.news/*",
+      "zone_id": "95646d20d7675139119e47fe4e619b7c"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "arabia",
+      "database_name": "arabia",
+      "database_id": "f4c8a778-cbad-4201-96f2-35f41ad800d0"
+    }
+  ],
+  "vars": {
+    "SITE_KEY": "0x4AAAAAAB9fcOZ50et9DCar",
+    "DOMAIN": "localhost:3000",
+    "NODE_ENV": "development"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "ARABIAN_KV",
+      "id": "425886aa915b4e5dac16d4831e632542"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "queue": "mailer",
+        "binding": "MAILER"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "mailer",
+        "max_batch_size": 100, // 100 messages per batch
+        "max_batch_timeout": 5 // 5 seconds per batch
+      }
+    ]
+  }
 }
