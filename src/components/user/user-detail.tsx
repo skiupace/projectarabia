@@ -23,6 +23,7 @@ import {
   unbanUserFn,
 } from "@/actions/admin-mod";
 import type { SafeUserWithStatus } from "@/types/users";
+import { useSiteKey } from "@/hooks/useSiteKey";
 
 // Adapter to convert ValidationResult to TanStack Form error format
 const toFormError = (result: ValidationResult): string | undefined => {
@@ -37,6 +38,7 @@ export function UserDetail({
   const { user: currentUser } = useAuth();
   const isOwnProfile = currentUser?.username === _user?.username;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const siteKey = useSiteKey();
 
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -257,6 +259,17 @@ export function UserDetail({
   }
 
   // Own profile with form
+  // Show loading state while site key is being fetched
+  if (!siteKey) {
+    return (
+      <div className="max-w-2xl px-2 py-3 font-mono text-right" dir="rtl">
+        <div className="text-center text-sm text-gray-600">
+          جاري التحميل...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl px-2 py-3 font-mono text-right" dir="rtl">
       <form
@@ -392,7 +405,7 @@ export function UserDetail({
               <>
                 <Turnstile
                   ref={turnstileRef}
-                  siteKey={import.meta.env.VITE_SITE_KEY}
+                  siteKey={siteKey}
                   onSuccess={(token) => {
                     field.handleChange(token);
                   }}

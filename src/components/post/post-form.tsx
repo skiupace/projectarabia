@@ -3,6 +3,7 @@ import { postFormOpts, type PostSubmition } from "@/schemas/forms/post";
 import { useForm } from "@tanstack/react-form";
 import { useRef } from "react";
 import type { Post } from "@/schemas/db/posts";
+import { useSiteKey } from "@/hooks/useSiteKey";
 
 export interface SubmitFormProps {
   onSubmit: (postRequest: PostSubmition) => void;
@@ -21,6 +22,18 @@ export default function PostForm({ onSubmit, post }: SubmitFormProps) {
     },
   });
   const ref = useRef<TurnstileInstance | null>(null);
+  const siteKey = useSiteKey();
+
+  // Show loading state while site key is being fetched
+  if (!siteKey) {
+    return (
+      <div className="max-w-2xl">
+        <div className="text-center text-sm text-gray-600">
+          جاري التحميل...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -176,7 +189,7 @@ export default function PostForm({ onSubmit, post }: SubmitFormProps) {
             <>
               <Turnstile
                 ref={ref}
-                siteKey={import.meta.env.VITE_SITE_KEY}
+                siteKey={siteKey}
                 onSuccess={(token) => {
                   field.handleChange(token);
                 }}

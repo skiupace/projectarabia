@@ -12,7 +12,7 @@ import {
   validatePassword,
   type ValidationResult,
 } from "@/services/validation";
-
+import { useSiteKey } from "@/hooks/useSiteKey";
 // Adapter to convert ValidationResult to TanStack Form error format
 const toFormError = (result: ValidationResult): string | undefined => {
   return result.valid ? undefined : result.error;
@@ -31,7 +31,6 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
     },
   });
   const loginRef = useRef<TurnstileInstance | null>(null);
-
   const registerForm = useForm({
     ...registerFormOpts,
     onSubmit: async ({ value }) => {
@@ -39,6 +38,19 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
     },
   });
   const registerRef = useRef<TurnstileInstance | null>(null);
+
+  const siteKey = useSiteKey();
+
+  // Show loading state while site key is being fetched
+  if (!siteKey) {
+    return (
+      <div className="max-w-2xl p-4">
+        <div className="text-center text-sm text-gray-600">
+          جاري التحميل...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl p-4">
@@ -148,7 +160,7 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
                 <>
                   <Turnstile
                     ref={loginRef}
-                    siteKey={import.meta.env.VITE_SITE_KEY}
+                    siteKey={siteKey}
                     onSuccess={(token) => {
                       field.handleChange(token);
                     }}
@@ -299,7 +311,7 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
                 <>
                   <Turnstile
                     ref={registerRef}
-                    siteKey={import.meta.env.VITE_SITE_KEY}
+                    siteKey={siteKey}
                     onSuccess={(token) => {
                       field.handleChange(token);
                     }}
