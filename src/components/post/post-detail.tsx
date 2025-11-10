@@ -228,10 +228,11 @@ export default function PostDetail({ post, commentsLength }: PostDetailProps) {
                 {post.title}
               </span>
             )}
-            {post.updatedAt && (
-              <em className="text-[10px] text-zinc-400">
-                (معدل {timeAgo(post.updatedAt)})
-              </em>
+            {post.updatedAt &&
+              differenceInMinutes(new Date(post.updatedAt), new Date(post.createdAt)) >= 5 && (
+                <em className="text-[10px] text-zinc-400">
+                  (معدل {timeAgo(post.updatedAt)})
+                </em>
             )}
             {domain && (
               <a
