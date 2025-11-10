@@ -7,7 +7,7 @@
     "build": "rm -rf dist && NODE_ENV=production CLOUDFLARE_ENV=production vite build",
     "serve": "vite preview",
     "generate-routes": "tsr generate",
-    "push-db": "drizzle-kit push",
+    "push-db": "CLOUDFLARE_ENV=development drizzle-kit push",
     "push-db:prod": "CLOUDFLARE_ENV=production drizzle-kit push",
     "watch-routes": "tsr watch",
     "test": "vitest run",

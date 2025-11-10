@@ -18,6 +18,6 @@ export default process.env.CLOUDFLARE_ENV === "production"
 			out: "drizzle",
 			schema: "src/schemas/db/schema.ts",
 			dbCredentials: {
-				url: ".wrangler/state/v3/d1/miniflare-D1DatabaseObject/e7b3435c5682e58442b380529a7382fade69fb3034c763824544122e980c535b.sqlite",
+				url: ".wrangler/state/v3/d1/miniflare-D1DatabaseObject/b2f2ab0d4f45f97f21f9f087e79b83ee7bc4bd433f50bca3610754da6612b17f.sqlite",
 			},
 		});

@@ -75,6 +75,23 @@ bun run dev
 
 ---
 
+## Deployment
+
+To deploy to production:
+
+```bash
+# Set all environment variables from .env file
+bun wrangler secret bulk .env --env production
+
+# Build the project
+bun run build
+
+# Deploy to Cloudflare
+bun run deploy
+```
+
+---
+
 ## License & Credits
 
 AGPL-3.0 License.
