@@ -7,14 +7,10 @@ import {
   getPostsByMonth,
 } from "@/services/posts";
 import type { PostWithUsername } from "@/types/posts";
-import { env } from "cloudflare:workers";
 import type { PostWithOrder } from "@/thealgorithm/ranking";
 import { useAppSession } from "./-sessions/useSession";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
-
-const CACHE_KEY = "babel:feed:latest";
-const CACHE_TTL_SECONDS = 300; // 5 minutes
 
 const HOT_POSTS_DAYS = 7;
 const MAX_POSTS = 50;
@@ -38,50 +34,17 @@ async function fetchRankedFeed(
   const session = await useAppSession();
   const userId = session.data.userId;
 
-  // Try to fetch from cache (full ranked list)
-  const cached = await env.ARABIAN_KV.get(CACHE_KEY);
-  let allRankedPosts: PostWithOrder[] | null = null;
+  // Fetch and rank all hot posts without caching
+  const result = await getHotPosts(userId, MAX_POSTS, HOT_POSTS_DAYS, page);
 
-  if (cached) {
-    try {
-      allRankedPosts = JSON.parse(cached) as PostWithOrder[];
-    } catch (_error) {
-      // Invalidate corrupted cache
-      await env.ARABIAN_KV.delete(CACHE_KEY);
-      logger.error("fetchRankedFeed", {
-        tag: "fetchRankedFeed",
-        action: "cache_corrupted",
-        userId,
-      });
-    }
-  }
-
-  // Cache MISS - Fetch and rank all hot posts
-  if (!allRankedPosts) {
-    const result = await getHotPosts(userId, MAX_POSTS, HOT_POSTS_DAYS, page);
-
-    // For page 1, cache the full result
-    if (page === 1) {
-      // Re-fetch all posts to cache the complete ranked list
-      const allPosts = await getHotPosts(userId, 500, HOT_POSTS_DAYS, 1);
-
-      // Cache the full ranked list
-      await env.ARABIAN_KV.put(CACHE_KEY, JSON.stringify(allPosts.posts), {
-        expirationTtl: CACHE_TTL_SECONDS,
-      });
-
-      allRankedPosts = allPosts.posts;
-    } else {
-      return result;
-    }
-  }
-
-  // Slice cached results for requested page
-  const offset = (page - 1) * MAX_POSTS;
-  const posts = allRankedPosts.slice(offset, offset + MAX_POSTS);
-  const hasMore = allRankedPosts.length > offset + MAX_POSTS;
-
-  return { posts, hasMore, totalPosts: allRankedPosts.length };
+  // Determine total posts and hasMore from result if available
+  // If getHotPosts does not include total count, you may need to add support for that in your data layer
+  // For now, we set hasMore as provided by getHotPosts, and totalPosts as length of posts (may need improvement)
+  return {
+    posts: result.posts,
+    hasMore: result.hasMore ?? (result.posts.length === MAX_POSTS),
+    totalPosts: result.totalPosts ?? result.posts.length,
+  };
 }
 
 async function fetchNewestPosts(
