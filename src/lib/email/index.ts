@@ -64,7 +64,7 @@ const templates: {
 } = {
   login: (data: LoginEmail) => ({
     subject:
-      env.NODE_ENV === "production"
+      env.CLOUDFLARE_ENV === "production"
         ? "بابل: تسجيل دخول جديد إلى حسابك"
         : "بابل: تسجيل دخول جديد إلى حسابك (تجربة)",
     text: `تم تسجيل دخول جديد إلى حسابك.
@@ -78,7 +78,7 @@ const templates: {
 
   reset: (data: ResetEmail) => ({
     subject:
-      env.NODE_ENV === "production"
+      env.CLOUDFLARE_ENV === "production"
         ? "بابل: إعادة تعيين كلمة المرور"
         : "بابل: إعادة تعيين كلمة المرور (تجربة)",
     text: `لقد طلبت إعادة تعيين كلمة المرور.
@@ -91,7 +91,7 @@ ${data.link}
 
   verify: (data: VerifyEmail) => ({
     subject:
-      env.NODE_ENV === "production"
+      env.CLOUDFLARE_ENV === "production"
         ? "بابل: تأكيد حسابك"
         : "بابل: تأكيد حسابك (تجربة)",
     text: `مرحبًا
@@ -125,7 +125,7 @@ ${data.link}
 
     return {
       subject:
-        env.NODE_ENV === "production"
+        env.CLOUDFLARE_ENV === "production"
           ? "بابل: إشعار جديد"
           : "بابل: إشعار جديد (تجربة)",
       text: `لديك إشعار جديد!

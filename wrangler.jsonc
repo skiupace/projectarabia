@@ -24,6 +24,80 @@
       "zone_id": "95646d20d7675139119e47fe4e619b7c"
     }
   ],
+  "env": {
+    "production": {
+      "vars": {
+        "DOMAIN": "b11z.news",
+        "CLOUDFLARE_DATABASE_ID": "b069ff1d-7a47-462e-b1e6-0164062d0748",
+        "CLOUDFLARE_ENV": "production",
+        "VITE_SITE_KEY": "0x4AAAAAAB9fcOZ50et9DCar"
+      },
+      "d1_databases": [
+        {
+          "binding": "arabia",
+          "database_name": "arabia",
+          "database_id": "b069ff1d-7a47-462e-b1e6-0164062d0748"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "ARABIAN_KV",
+          "id": "2dbc45eb4b0248a1a804a97d19b9f7c9"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "queue": "mailer",
+            "binding": "MAILER"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "mailer",
+            "max_batch_size": 100, // 100 messages per batch
+            "max_batch_timeout": 5 // 5 seconds per batch
+          }
+        ]
+      }
+    },
+    "development": {
+      "vars": {
+        "DOMAIN": "localhost:3000",
+        "CLOUDFLARE_DATABASE_ID": "b069ff1d-7a47-462e-b1e6-0164062d0748",
+        "CLOUDFLARE_ENV": "development",
+        "VITE_SITE_KEY": "0x4AAAAAAB9fcOZ50et9DCar"
+      },
+      "d1_databases": [
+        {
+          "binding": "arabia",
+          "database_name": "arabia",
+          "database_id": "b069ff1d-7a47-462e-b1e6-0164062d0748"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "ARABIAN_KV",
+          "id": "2dbc45eb4b0248a1a804a97d19b9f7c9"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "queue": "mailer",
+            "binding": "MAILER"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "mailer",
+            "max_batch_size": 100, // 100 messages per batch
+            "max_batch_timeout": 5 // 5 seconds per batch
+          }
+        ]
+      }
+    }
+  },
   "d1_databases": [
     {
       "binding": "arabia",
@@ -31,26 +105,10 @@
       "database_id": "b069ff1d-7a47-462e-b1e6-0164062d0748"
     }
   ],
-  "env": {
-    "production": {
-      "vars": {
-        "DOMAIN": "b11z.news",
-      }
-    },
-    "development": {
-      "vars": {
-        "DOMAIN": "localhost:3000",
-      }
-    }
-  },
-  "vars": {
-    "SITE_KEY": "0x4AAAAAAB9fcOZ50et9DCar",
-    "CLOUDFLARE_DATABASE_ID": "b069ff1d-7a47-462e-b1e6-0164062d0748"
-  },
   "kv_namespaces": [
     {
       "binding": "ARABIAN_KV",
-      "id": "425886aa915b4e5dac16d4831e632542"
+      "id": "2dbc45eb4b0248a1a804a97d19b9f7c9"
     }
   ],
   "queues": {

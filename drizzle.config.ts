@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 import "dotenv/config";
 
-export default process.env.NODE_ENV === "production"
+export default process.env.CLOUDFLARE_ENV === "production"
 	? defineConfig({
 			dialect: "sqlite",
 			driver: "d1-http",
