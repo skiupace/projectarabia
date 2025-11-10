@@ -3,11 +3,26 @@ import { getPostsByUsernameFn } from "@/actions/get-post";
 import PostRow from "@/components/post/post-row";
 import { usePostsStore } from "@/stores/posts";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/posts/$username")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    return await getPostsByUsernameFn({ data: { username: params.username } });
+    try {
+      logger.info("routes/posts/$username:loader", { username: params.username });
+      const result = await getPostsByUsernameFn({ data: { username: params.username } });
+      logger.info("routes/posts/$username:loader:success", { 
+        username: params.username,
+        postCount: result.posts?.length || 0 
+      });
+      return result;
+    } catch (error) {
+      logger.error("routes/posts/$username:loader", { 
+        username: params.username,
+        error: error instanceof Error ? error.message : String(error) 
+      });
+      throw error;
+    }
   },
 });
 

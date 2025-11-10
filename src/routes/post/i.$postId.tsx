@@ -9,13 +9,32 @@ import { useAuth } from "@/contexts/auth";
 import { commentSubmitFn } from "@/actions/comment-submit";
 import { useCommentsStore } from "@/stores/comments";
 import { timeAgo } from "@/lib/time";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/post/i/$postId")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    return await getPostByIdJoinedWithCommentsFn({
-      data: { postId: params.postId },
-    });
+    try {
+      logger.info("routes/post/i.$postId:loader", { postId: params.postId });
+      const result = await getPostByIdJoinedWithCommentsFn({
+        data: { postId: params.postId },
+      });
+      if (!result.postWithComments) {
+        logger.warn("routes/post/i.$postId:loader:notFound", { postId: params.postId });
+      } else {
+        logger.info("routes/post/i.$postId:loader:success", {
+          postId: params.postId,
+          commentCount: result.postWithComments.comments?.length || 0
+        });
+      }
+      return result;
+    } catch (error) {
+      logger.error("routes/post/i.$postId:loader", {
+        postId: params.postId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
   },
 });
 

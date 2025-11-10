@@ -64,10 +64,8 @@ class Logger {
         console.warn(message);
         break;
       case "debug":
-        // Only log debug in development
-        if (process.env.NODE_ENV !== "production") {
-          console.log(message);
-        }
+        // Debug logs in production - use sparingly
+        console.log(message);
         break;
       default:
         console.log(message);

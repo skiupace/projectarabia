@@ -3,11 +3,26 @@ import { getCommentsByUsername } from "@/actions/get-comments";
 import CommentRow from "@/components/comment/comment-row";
 import { useCommentFeedsStore } from "@/stores/comment-feeds";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/comments/$username")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    return await getCommentsByUsername({ data: { username: params.username } });
+    try {
+      logger.info("routes/comments/$username:loader", { username: params.username });
+      const result = await getCommentsByUsername({ data: { username: params.username } });
+      logger.info("routes/comments/$username:loader:success", { 
+        username: params.username,
+        commentCount: result.comments?.length || 0 
+      });
+      return result;
+    } catch (error) {
+      logger.error("routes/comments/$username:loader", { 
+        username: params.username,
+        error: error instanceof Error ? error.message : String(error) 
+      });
+      throw error;
+    }
   },
 });
 

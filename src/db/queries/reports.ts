@@ -1,6 +1,7 @@
 import { db } from "@/schemas/db";
 import { reports } from "@/schemas/db/schema";
 import { eq, desc, and, type SQL } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 export interface ReportData {
   postId?: string;
@@ -10,38 +11,73 @@ export interface ReportData {
 }
 
 export async function createReport(data: ReportData) {
-  // Validation: Must have either postId or commentId, not both, not neither.
-  if (!!data.postId === !!data.commentId) {
-    throw new Error("Must provide either postId or commentId for a report.");
+  try {
+    // Validation: Must have either postId or commentId, not both, not neither.
+    if (!!data.postId === !!data.commentId) {
+      logger.error("queries/reports:createReport:invalid", { userId: data.userId });
+      throw new Error("Must provide either postId or commentId for a report.");
+    }
+    logger.info("queries/reports:createReport", { 
+      userId: data.userId, 
+      postId: data.postId,
+      commentId: data.commentId,
+      reason: data.reason
+    });
+    const result = await db.insert(reports).values(data).returning().get();
+    logger.info("queries/reports:createReport:success", { reportId: result.id, userId: data.userId });
+    return result;
+  } catch (error) {
+    logger.error("queries/reports:createReport", { 
+      userId: data.userId,
+      error: error instanceof Error ? error.message : String(error) 
+    });
+    throw error;
   }
-  return await db.insert(reports).values(data).returning().get();
 }
 
 export async function deleteReport(data: ReportData) {
-  const hasPostId = typeof data.postId === "string" && data.postId.length > 0;
-  const hasCommentId =
-    typeof data.commentId === "string" && data.commentId.length > 0;
+  try {
+    const hasPostId = typeof data.postId === "string" && data.postId.length > 0;
+    const hasCommentId =
+      typeof data.commentId === "string" && data.commentId.length > 0;
 
-  if ((hasPostId && hasCommentId) || (!hasPostId && !hasCommentId)) {
-    throw new Error("Must provide either postId or commentId for a report.");
+    if ((hasPostId && hasCommentId) || (!hasPostId && !hasCommentId)) {
+      logger.error("queries/reports:deleteReport:invalid", { userId: data.userId });
+      throw new Error("Must provide either postId or commentId for a report.");
+    }
+
+    logger.info("queries/reports:deleteReport", { 
+      userId: data.userId, 
+      postId: data.postId,
+      commentId: data.commentId
+    });
+
+    let condition: SQL | undefined;
+    if (hasPostId && data.postId) {
+      condition = and(
+        eq(reports.postId, data.postId),
+        eq(reports.userId, data.userId),
+      );
+    } else if (hasCommentId && data.commentId) {
+      condition = and(
+        eq(reports.commentId, data.commentId),
+        eq(reports.userId, data.userId),
+      );
+    } else {
+      logger.error("queries/reports:deleteReport:invalidData", { userId: data.userId });
+      throw new Error("Invalid data for report deletion.");
+    }
+
+    const result = await db.delete(reports).where(condition).returning().get();
+    logger.info("queries/reports:deleteReport:success", { userId: data.userId });
+    return result;
+  } catch (error) {
+    logger.error("queries/reports:deleteReport", { 
+      userId: data.userId,
+      error: error instanceof Error ? error.message : String(error) 
+    });
+    throw error;
   }
-
-  let condition: SQL | undefined;
-  if (hasPostId && data.postId) {
-    condition = and(
-      eq(reports.postId, data.postId),
-      eq(reports.userId, data.userId),
-    );
-  } else if (hasCommentId && data.commentId) {
-    condition = and(
-      eq(reports.commentId, data.commentId),
-      eq(reports.userId, data.userId),
-    );
-  } else {
-    throw new Error("Invalid data for report deletion.");
-  }
-
-  return await db.delete(reports).where(condition).returning().get();
 }
 
 export async function findReportById(id: string) {

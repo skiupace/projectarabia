@@ -3,11 +3,24 @@ import { getNewestPostsFn } from "@/actions/get-feed";
 import PostRow from "@/components/post/post-row";
 import { usePostsStore } from "@/stores/posts";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/newest/")({
   component: RouteComponent,
   loader: async () => {
-    return await getNewestPostsFn({ data: {} });
+    try {
+      logger.info("routes/newest/index:loader");
+      const result = await getNewestPostsFn({ data: {} });
+      logger.info("routes/newest/index:loader:success", { 
+        postCount: result.posts?.length || 0 
+      });
+      return result;
+    } catch (error) {
+      logger.error("routes/newest/index:loader", { 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+      throw error;
+    }
   },
 });
 

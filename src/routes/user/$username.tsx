@@ -1,14 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UserDetail } from "@/components/user/user-detail";
 import { getUserByUsernameWithStatusAndBadgesFn } from "@/actions/get-user";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/user/$username")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    const result = await getUserByUsernameWithStatusAndBadgesFn({
-      data: { username: params.username },
-    });
-    return { result };
+    try {
+      logger.info("routes/user/$username:loader", { username: params.username });
+      const result = await getUserByUsernameWithStatusAndBadgesFn({
+        data: { username: params.username },
+      });
+      if (!result || !result.SafeUserWithStatus) {
+        logger.warn("routes/user/$username:loader:notFound", { username: params.username });
+      } else {
+        logger.info("routes/user/$username:loader:success", { username: params.username });
+      }
+      return { result };
+    } catch (error) {
+      logger.error("routes/user/$username:loader", {
+        username: params.username,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
   },
 });
 

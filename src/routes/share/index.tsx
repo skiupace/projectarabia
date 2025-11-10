@@ -3,11 +3,24 @@ import { getSharePostsFn } from "@/actions/get-feed";
 import PostRow from "@/components/post/post-row";
 import { usePostsStore } from "@/stores/posts";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/share/")({
   component: RouteComponent,
   loader: async () => {
-    return await getSharePostsFn({ data: {} });
+    try {
+      logger.info("routes/share/index:loader");
+      const result = await getSharePostsFn({ data: {} });
+      logger.info("routes/share/index:loader:success", { 
+        postCount: result.posts?.length || 0 
+      });
+      return result;
+    } catch (error) {
+      logger.error("routes/share/index:loader", { 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+      throw error;
+    }
   },
 });
 

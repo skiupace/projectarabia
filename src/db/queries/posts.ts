@@ -4,6 +4,7 @@ import { posts, users } from "@/schemas/db/schema";
 import { subDays } from "date-fns";
 import type { Post } from "@/schemas/db/posts";
 import type { PostSubmition } from "@/schemas/forms/post";
+import { logger } from "@/lib/logger";
 
 /** QUERY OPERATIONS */
 export async function createPost(data: {
@@ -12,27 +13,49 @@ export async function createPost(data: {
   url: string | null;
   userId: string;
 }) {
-  return await db
-    .insert(posts)
-    .values({
-      title: data.title,
-      text: data.text,
-      url: data.url,
+  try {
+    logger.info("queries/posts:createPost", { userId: data.userId, hasUrl: !!data.url });
+    const result = await db
+      .insert(posts)
+      .values({
+        title: data.title,
+        text: data.text,
+        url: data.url,
+        userId: data.userId,
+        votes: 0,
+        commentCount: 0,
+      })
+      .returning()
+      .get();
+    logger.info("queries/posts:createPost:success", { postId: result.id, userId: data.userId });
+    return result;
+  } catch (error) {
+    logger.error("queries/posts:createPost", {
       userId: data.userId,
-      votes: 0,
-      commentCount: 0,
-    })
-    .returning()
-    .get();
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
+  }
 }
 
 export async function deletePost(id: string) {
-  return await db
-    .update(posts)
-    .set({ hidden: true })
-    .where(eq(posts.id, id))
-    .returning()
-    .get();
+  try {
+    logger.info("queries/posts:deletePost", { postId: id });
+    const result = await db
+      .update(posts)
+      .set({ hidden: true })
+      .where(eq(posts.id, id))
+      .returning()
+      .get();
+    logger.info("queries/posts:deletePost:success", { postId: id });
+    return result;
+  } catch (error) {
+    logger.error("queries/posts:deletePost", {
+      postId: id,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
+  }
 }
 
 export async function findPostById(id: string) {
@@ -71,16 +94,25 @@ export async function findPostByIdWithUsername(id: string) {
 
 /** UPDATE OPERATIONS */
 export async function incrementCommentCount(postId: string) {
-  const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+  try {
+    const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
 
-  if (!post) {
-    throw new Error("Post not found");
+    if (!post) {
+      logger.warn("queries/posts:incrementCommentCount:notFound", { postId });
+      throw new Error("Post not found");
+    }
+
+    await db
+      .update(posts)
+      .set({ commentCount: post.commentCount + 1 })
+      .where(eq(posts.id, postId));
+  } catch (error) {
+    logger.error("queries/posts:incrementCommentCount", {
+      postId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
   }
-
-  await db
-    .update(posts)
-    .set({ commentCount: post.commentCount + 1 })
-    .where(eq(posts.id, postId));
 }
 
 export async function decrementCommentCount(postId: string) {
@@ -97,16 +129,25 @@ export async function decrementCommentCount(postId: string) {
 }
 
 export async function incrementVoteCount(postId: string) {
-  const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+  try {
+    const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
 
-  if (!post) {
-    throw new Error("Post not found");
+    if (!post) {
+      logger.warn("queries/posts:incrementVoteCount:notFound", { postId });
+      throw new Error("Post not found");
+    }
+
+    await db
+      .update(posts)
+      .set({ votes: post.votes + 1 })
+      .where(eq(posts.id, postId));
+  } catch (error) {
+    logger.error("queries/posts:incrementVoteCount", {
+      postId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
   }
-
-  await db
-    .update(posts)
-    .set({ votes: post.votes + 1 })
-    .where(eq(posts.id, postId));
 }
 
 export async function decrementVoteCount(postId: string) {
@@ -123,16 +164,26 @@ export async function decrementVoteCount(postId: string) {
 }
 
 export async function incrementReportCountPost(postId: string) {
-  const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+  try {
+    const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
 
-  if (!post) {
-    throw new Error("Post not found");
+    if (!post) {
+      logger.warn("queries/posts:incrementReportCountPost:notFound", { postId });
+      throw new Error("Post not found");
+    }
+
+    await db
+      .update(posts)
+      .set({ reportCount: post.reportCount ? post.reportCount + 1 : 1 })
+      .where(eq(posts.id, postId));
+    logger.info("queries/posts:incrementReportCountPost:success", { postId });
+  } catch (error) {
+    logger.error("queries/posts:incrementReportCountPost", {
+      postId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
   }
-
-  await db
-    .update(posts)
-    .set({ reportCount: post.reportCount ? post.reportCount + 1 : 1 })
-    .where(eq(posts.id, postId));
 }
 
 export async function decrementReportCountPost(postId: string) {
@@ -201,26 +252,38 @@ export async function getPostsInRange(
 }
 
 export async function updatePost(post: PostSubmition, postId: string) {
-  const oldPost = await findPostById(postId);
+  try {
+    logger.info("queries/posts:updatePost", { postId });
+    const oldPost = await findPostById(postId);
 
-  if (!oldPost) {
-    throw new Error("Post not found");
+    if (!oldPost) {
+      logger.warn("queries/posts:updatePost:notFound", { postId });
+      throw new Error("Post not found");
+    }
+
+    const result = await db
+      .update(posts)
+      .set({
+        title: post.post.title?.trim() || oldPost.title,
+        url:
+          post.post.url && post.post.url.trim() !== ""
+            ? post.post.url.trim()
+            : null,
+        text: post.post.text?.trim() || oldPost.text,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(posts.id, postId))
+      .returning()
+      .get();
+    logger.info("queries/posts:updatePost:success", { postId });
+    return result;
+  } catch (error) {
+    logger.error("queries/posts:updatePost", {
+      postId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
   }
-
-  return await db
-    .update(posts)
-    .set({
-      title: post.post.title?.trim() || oldPost.title,
-      url:
-        post.post.url && post.post.url.trim() !== ""
-          ? post.post.url.trim()
-          : null,
-      text: post.post.text?.trim() || oldPost.text,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(posts.id, postId))
-    .returning()
-    .get();
 }
 
 // Helper function to normalize Arabic alef variations

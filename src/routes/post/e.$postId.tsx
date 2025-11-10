@@ -8,34 +8,68 @@ import { editPostFn } from "@/actions/post-submit";
 import { adminEditPostFn } from "@/actions/admin-mod";
 import { differenceInMinutes } from "date-fns";
 import { EDIT_COOLDOWN_MINUTES, MAX_ABOUT_LENGTH } from "@/constants/limts";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/post/e/$postId")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const user = await getCurrentUserFn();
-    if (!user) {
-      throw redirect({ to: "/login" });
+    try {
+      logger.info("routes/post/e.$postId:beforeLoad");
+      const user = await getCurrentUserFn();
+      if (!user) {
+        logger.warn("routes/post/e.$postId:beforeLoad:unauthorized");
+        throw redirect({ to: "/login" });
+      }
+      logger.info("routes/post/e.$postId:beforeLoad:success", { userId: user.userId });
+    } catch (error) {
+      if (error instanceof Response) throw error;
+      logger.error("routes/post/e.$postId:beforeLoad", {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
     }
   },
   loader: async ({ params }) => {
-    const user = await getCurrentUserFn();
-    const postData = await getPostbyIdFn({
-      data: { postId: params.postId },
-    });
+    try {
+      logger.info("routes/post/e.$postId:loader", { postId: params.postId });
+      const user = await getCurrentUserFn();
+      const postData = await getPostbyIdFn({
+        data: { postId: params.postId },
+      });
 
-    // Check if user is owner or moderator
-    if (!postData.post) {
-      throw redirect({ to: "/" });
+      // Check if user is owner or moderator
+      if (!postData.post) {
+        logger.warn("routes/post/e.$postId:loader:notFound", { postId: params.postId });
+        throw redirect({ to: "/" });
+      }
+
+      const isOwner = user?.userId === postData.post.userId;
+      const isModerator = user?.role === "moderator";
+
+      if (!isOwner && !isModerator) {
+        logger.warn("routes/post/e.$postId:loader:unauthorized", {
+          postId: params.postId,
+          userId: user?.userId,
+          isOwner,
+          isModerator
+        });
+        throw redirect({ to: "/" });
+      }
+
+      logger.info("routes/post/e.$postId:loader:success", {
+        postId: params.postId,
+        isOwner,
+        isModerator
+      });
+      return { ...postData, isOwner, isModerator };
+    } catch (error) {
+      if (error instanceof Response) throw error;
+      logger.error("routes/post/e.$postId:loader", {
+        postId: params.postId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
     }
-
-    const isOwner = user?.userId === postData.post.userId;
-    const isModerator = user?.role === "moderator";
-
-    if (!isOwner && !isModerator) {
-      throw redirect({ to: "/" });
-    }
-
-    return { ...postData, isOwner, isModerator };
   },
 });
 

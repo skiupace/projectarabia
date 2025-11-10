@@ -3,11 +3,24 @@ import { getComments } from "@/actions/get-comments";
 import CommentRow from "@/components/comment/comment-row";
 import { useCommentFeedsStore } from "@/stores/comment-feeds";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/comments/")({
   component: RouteComponent,
   loader: async () => {
-    return await getComments({ data: {} });
+    try {
+      logger.info("routes/comments/index:loader");
+      const result = await getComments({ data: {} });
+      logger.info("routes/comments/index:loader:success", { 
+        commentCount: result.comments?.length || 0 
+      });
+      return result;
+    } catch (error) {
+      logger.error("routes/comments/index:loader", { 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+      throw error;
+    }
   },
 });
 

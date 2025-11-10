@@ -3,6 +3,7 @@ import PostRow from "@/components/post/post-row";
 import { rankedFeedFn } from "@/actions/get-feed";
 import type { PostWithOrder } from "@/thealgorithm/ranking";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const searchSchema = z.object({
   p: z.number().optional().default(1).catch(1),
@@ -14,7 +15,21 @@ export const Route = createFileRoute("/")({
   loaderDeps: ({ search }) => ({ page: search.p }),
   loader: async ({ deps }) => {
     const page = deps.page || 1;
-    return await rankedFeedFn({ data: { page } });
+    try {
+      logger.info("routes/index:loader", { page });
+      const result = await rankedFeedFn({ data: { page } });
+      logger.info("routes/index:loader:success", {
+        page,
+        postCount: result.posts?.length || 0
+      });
+      return result;
+    } catch (error) {
+      logger.error("routes/index:loader", {
+        page,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
   },
 });
 

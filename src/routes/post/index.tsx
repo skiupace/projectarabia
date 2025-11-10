@@ -4,13 +4,25 @@ import { sharePostFn } from "@/actions/post-submit";
 import { getCurrentUserFn } from "@/actions/getter.auth";
 import { useState } from "react";
 import type { PostSubmition } from "@/schemas/forms/post";
+import { logger } from "@/lib/logger";
 
 export const Route = createFileRoute("/post/")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const user = await getCurrentUserFn();
-    if (!user) {
-      throw redirect({ to: "/login" });
+    try {
+      logger.info("routes/post/index:beforeLoad");
+      const user = await getCurrentUserFn();
+      if (!user) {
+        logger.warn("routes/post/index:beforeLoad:unauthorized");
+        throw redirect({ to: "/login" });
+      }
+      logger.info("routes/post/index:beforeLoad:success", { userId: user.userId });
+    } catch (error) {
+      if (error instanceof Response) throw error; // Re-throw redirect
+      logger.error("routes/post/index:beforeLoad", {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
     }
   },
 });
