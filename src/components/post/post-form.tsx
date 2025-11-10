@@ -28,9 +28,7 @@ export default function PostForm({ onSubmit, post }: SubmitFormProps) {
   if (!siteKey) {
     return (
       <div className="max-w-2xl">
-        <div className="text-center text-sm text-gray-600">
-          جاري التحميل...
-        </div>
+        <div className="text-center text-sm text-gray-600">جاري التحميل...</div>
       </div>
     );
   }

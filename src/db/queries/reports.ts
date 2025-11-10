@@ -14,22 +14,27 @@ export async function createReport(data: ReportData) {
   try {
     // Validation: Must have either postId or commentId, not both, not neither.
     if (!!data.postId === !!data.commentId) {
-      logger.error("queries/reports:createReport:invalid", { userId: data.userId });
+      logger.error("queries/reports:createReport:invalid", {
+        userId: data.userId,
+      });
       throw new Error("Must provide either postId or commentId for a report.");
     }
-    logger.info("queries/reports:createReport", { 
-      userId: data.userId, 
+    logger.info("queries/reports:createReport", {
+      userId: data.userId,
       postId: data.postId,
       commentId: data.commentId,
-      reason: data.reason
+      reason: data.reason,
     });
     const result = await db.insert(reports).values(data).returning().get();
-    logger.info("queries/reports:createReport:success", { reportId: result.id, userId: data.userId });
+    logger.info("queries/reports:createReport:success", {
+      reportId: result.id,
+      userId: data.userId,
+    });
     return result;
   } catch (error) {
-    logger.error("queries/reports:createReport", { 
+    logger.error("queries/reports:createReport", {
       userId: data.userId,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -42,14 +47,16 @@ export async function deleteReport(data: ReportData) {
       typeof data.commentId === "string" && data.commentId.length > 0;
 
     if ((hasPostId && hasCommentId) || (!hasPostId && !hasCommentId)) {
-      logger.error("queries/reports:deleteReport:invalid", { userId: data.userId });
+      logger.error("queries/reports:deleteReport:invalid", {
+        userId: data.userId,
+      });
       throw new Error("Must provide either postId or commentId for a report.");
     }
 
-    logger.info("queries/reports:deleteReport", { 
-      userId: data.userId, 
+    logger.info("queries/reports:deleteReport", {
+      userId: data.userId,
       postId: data.postId,
-      commentId: data.commentId
+      commentId: data.commentId,
     });
 
     let condition: SQL | undefined;
@@ -64,17 +71,21 @@ export async function deleteReport(data: ReportData) {
         eq(reports.userId, data.userId),
       );
     } else {
-      logger.error("queries/reports:deleteReport:invalidData", { userId: data.userId });
+      logger.error("queries/reports:deleteReport:invalidData", {
+        userId: data.userId,
+      });
       throw new Error("Invalid data for report deletion.");
     }
 
     const result = await db.delete(reports).where(condition).returning().get();
-    logger.info("queries/reports:deleteReport:success", { userId: data.userId });
+    logger.info("queries/reports:deleteReport:success", {
+      userId: data.userId,
+    });
     return result;
   } catch (error) {
-    logger.error("queries/reports:deleteReport", { 
+    logger.error("queries/reports:deleteReport", {
       userId: data.userId,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }

@@ -17,18 +17,21 @@ export async function createVote(data: VoteData) {
       logger.error("queries/votes:createVote:invalid", { userId: data.userId });
       throw new Error("Must provide either postId or commentId for a vote.");
     }
-    logger.info("queries/votes:createVote", { 
-      userId: data.userId, 
+    logger.info("queries/votes:createVote", {
+      userId: data.userId,
       postId: data.postId,
-      commentId: data.commentId
+      commentId: data.commentId,
     });
     const result = await db.insert(votes).values(data).returning().get();
-    logger.info("queries/votes:createVote:success", { voteId: result.id, userId: data.userId });
+    logger.info("queries/votes:createVote:success", {
+      voteId: result.id,
+      userId: data.userId,
+    });
     return result;
   } catch (error) {
-    logger.error("queries/votes:createVote", { 
+    logger.error("queries/votes:createVote", {
       userId: data.userId,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -45,10 +48,10 @@ export async function deleteVote(data: VoteData) {
       throw new Error("Must provide either postId or commentId for a vote.");
     }
 
-    logger.info("queries/votes:deleteVote", { 
-      userId: data.userId, 
+    logger.info("queries/votes:deleteVote", {
+      userId: data.userId,
       postId: data.postId,
-      commentId: data.commentId
+      commentId: data.commentId,
     });
 
     let condition: SQL | undefined;
@@ -63,7 +66,9 @@ export async function deleteVote(data: VoteData) {
         eq(votes.userId, data.userId),
       );
     } else {
-      logger.error("queries/votes:deleteVote:invalidData", { userId: data.userId });
+      logger.error("queries/votes:deleteVote:invalidData", {
+        userId: data.userId,
+      });
       throw new Error("Invalid data for vote deletion.");
     }
 
@@ -71,9 +76,9 @@ export async function deleteVote(data: VoteData) {
     logger.info("queries/votes:deleteVote:success", { userId: data.userId });
     return result;
   } catch (error) {
-    logger.error("queries/votes:deleteVote", { 
+    logger.error("queries/votes:deleteVote", {
       userId: data.userId,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }

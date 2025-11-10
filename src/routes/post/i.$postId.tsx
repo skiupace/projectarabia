@@ -20,18 +20,20 @@ export const Route = createFileRoute("/post/i/$postId")({
         data: { postId: params.postId },
       });
       if (!result.postWithComments) {
-        logger.warn("routes/post/i.$postId:loader:notFound", { postId: params.postId });
+        logger.warn("routes/post/i.$postId:loader:notFound", {
+          postId: params.postId,
+        });
       } else {
         logger.info("routes/post/i.$postId:loader:success", {
           postId: params.postId,
-          commentCount: result.postWithComments.comments?.length || 0
+          commentCount: result.postWithComments.comments?.length || 0,
         });
       }
       return result;
     } catch (error) {
       logger.error("routes/post/i.$postId:loader", {
         postId: params.postId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

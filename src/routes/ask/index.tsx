@@ -11,13 +11,13 @@ export const Route = createFileRoute("/ask/")({
     try {
       logger.info("routes/ask/index:loader");
       const result = await getAskPostsFn({ data: {} });
-      logger.info("routes/ask/index:loader:success", { 
-        postCount: result.posts?.length || 0 
+      logger.info("routes/ask/index:loader:success", {
+        postCount: result.posts?.length || 0,
       });
       return result;
     } catch (error) {
-      logger.error("routes/ask/index:loader", { 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error("routes/ask/index:loader", {
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

@@ -11,13 +11,13 @@ export const Route = createFileRoute("/newest/")({
     try {
       logger.info("routes/newest/index:loader");
       const result = await getNewestPostsFn({ data: {} });
-      logger.info("routes/newest/index:loader:success", { 
-        postCount: result.posts?.length || 0 
+      logger.info("routes/newest/index:loader:success", {
+        postCount: result.posts?.length || 0,
       });
       return result;
     } catch (error) {
-      logger.error("routes/newest/index:loader", { 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error("routes/newest/index:loader", {
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

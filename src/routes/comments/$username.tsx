@@ -9,17 +9,21 @@ export const Route = createFileRoute("/comments/$username")({
   component: RouteComponent,
   loader: async ({ params }) => {
     try {
-      logger.info("routes/comments/$username:loader", { username: params.username });
-      const result = await getCommentsByUsername({ data: { username: params.username } });
-      logger.info("routes/comments/$username:loader:success", { 
+      logger.info("routes/comments/$username:loader", {
         username: params.username,
-        commentCount: result.comments?.length || 0 
+      });
+      const result = await getCommentsByUsername({
+        data: { username: params.username },
+      });
+      logger.info("routes/comments/$username:loader:success", {
+        username: params.username,
+        commentCount: result.comments?.length || 0,
       });
       return result;
     } catch (error) {
-      logger.error("routes/comments/$username:loader", { 
+      logger.error("routes/comments/$username:loader", {
         username: params.username,
-        error: error instanceof Error ? error.message : String(error) 
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

@@ -20,11 +20,13 @@ export const Route = createFileRoute("/post/e/$postId")({
         logger.warn("routes/post/e.$postId:beforeLoad:unauthorized");
         throw redirect({ to: "/login" });
       }
-      logger.info("routes/post/e.$postId:beforeLoad:success", { userId: user.userId });
+      logger.info("routes/post/e.$postId:beforeLoad:success", {
+        userId: user.userId,
+      });
     } catch (error) {
       if (error instanceof Response) throw error;
       logger.error("routes/post/e.$postId:beforeLoad", {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -39,7 +41,9 @@ export const Route = createFileRoute("/post/e/$postId")({
 
       // Check if user is owner or moderator
       if (!postData.post) {
-        logger.warn("routes/post/e.$postId:loader:notFound", { postId: params.postId });
+        logger.warn("routes/post/e.$postId:loader:notFound", {
+          postId: params.postId,
+        });
         throw redirect({ to: "/" });
       }
 
@@ -51,7 +55,7 @@ export const Route = createFileRoute("/post/e/$postId")({
           postId: params.postId,
           userId: user?.userId,
           isOwner,
-          isModerator
+          isModerator,
         });
         throw redirect({ to: "/" });
       }
@@ -59,14 +63,14 @@ export const Route = createFileRoute("/post/e/$postId")({
       logger.info("routes/post/e.$postId:loader:success", {
         postId: params.postId,
         isOwner,
-        isModerator
+        isModerator,
       });
       return { ...postData, isOwner, isModerator };
     } catch (error) {
       if (error instanceof Response) throw error;
       logger.error("routes/post/e.$postId:loader", {
         postId: params.postId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

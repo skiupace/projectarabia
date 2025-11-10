@@ -27,7 +27,10 @@ export async function createUser(data: {
   password: string;
 }) {
   try {
-    logger.info("queries/users:createUser", { username: data.username, hasEmail: !!data.email });
+    logger.info("queries/users:createUser", {
+      username: data.username,
+      hasEmail: !!data.email,
+    });
     const result = await db
       .insert(users)
       .values({
@@ -37,12 +40,15 @@ export async function createUser(data: {
       })
       .returning()
       .get();
-    logger.info("queries/users:createUser:success", { userId: result.id, username: data.username });
+    logger.info("queries/users:createUser:success", {
+      userId: result.id,
+      username: data.username,
+    });
     return result;
   } catch (error) {
-    logger.error("queries/users:createUser", { 
+    logger.error("queries/users:createUser", {
       username: data.username,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -67,9 +73,9 @@ export async function updateUserProfile(
     logger.info("queries/users:updateUserProfile:success", { userId: id });
     return result;
   } catch (error) {
-    logger.error("queries/users:updateUserProfile", { 
+    logger.error("queries/users:updateUserProfile", {
       userId: id,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }

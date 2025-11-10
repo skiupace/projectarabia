@@ -20,13 +20,13 @@ export const Route = createFileRoute("/")({
       const result = await rankedFeedFn({ data: { page } });
       logger.info("routes/index:loader:success", {
         page,
-        postCount: result.posts?.length || 0
+        postCount: result.posts?.length || 0,
       });
       return result;
     } catch (error) {
       logger.error("routes/index:loader", {
         page,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

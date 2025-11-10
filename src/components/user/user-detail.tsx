@@ -263,9 +263,7 @@ export function UserDetail({
   if (!siteKey) {
     return (
       <div className="max-w-2xl px-2 py-3 font-mono text-right" dir="rtl">
-        <div className="text-center text-sm text-gray-600">
-          جاري التحميل...
-        </div>
+        <div className="text-center text-sm text-gray-600">جاري التحميل...</div>
       </div>
     );
   }

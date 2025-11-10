@@ -14,7 +14,10 @@ export async function createPost(data: {
   userId: string;
 }) {
   try {
-    logger.info("queries/posts:createPost", { userId: data.userId, hasUrl: !!data.url });
+    logger.info("queries/posts:createPost", {
+      userId: data.userId,
+      hasUrl: !!data.url,
+    });
     const result = await db
       .insert(posts)
       .values({
@@ -27,12 +30,15 @@ export async function createPost(data: {
       })
       .returning()
       .get();
-    logger.info("queries/posts:createPost:success", { postId: result.id, userId: data.userId });
+    logger.info("queries/posts:createPost:success", {
+      postId: result.id,
+      userId: data.userId,
+    });
     return result;
   } catch (error) {
     logger.error("queries/posts:createPost", {
       userId: data.userId,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -52,7 +58,7 @@ export async function deletePost(id: string) {
   } catch (error) {
     logger.error("queries/posts:deletePost", {
       postId: id,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -95,7 +101,11 @@ export async function findPostByIdWithUsername(id: string) {
 /** UPDATE OPERATIONS */
 export async function incrementCommentCount(postId: string) {
   try {
-    const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+    const post = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .get();
 
     if (!post) {
       logger.warn("queries/posts:incrementCommentCount:notFound", { postId });
@@ -109,7 +119,7 @@ export async function incrementCommentCount(postId: string) {
   } catch (error) {
     logger.error("queries/posts:incrementCommentCount", {
       postId,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -130,7 +140,11 @@ export async function decrementCommentCount(postId: string) {
 
 export async function incrementVoteCount(postId: string) {
   try {
-    const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+    const post = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .get();
 
     if (!post) {
       logger.warn("queries/posts:incrementVoteCount:notFound", { postId });
@@ -144,7 +158,7 @@ export async function incrementVoteCount(postId: string) {
   } catch (error) {
     logger.error("queries/posts:incrementVoteCount", {
       postId,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -165,10 +179,16 @@ export async function decrementVoteCount(postId: string) {
 
 export async function incrementReportCountPost(postId: string) {
   try {
-    const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+    const post = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .get();
 
     if (!post) {
-      logger.warn("queries/posts:incrementReportCountPost:notFound", { postId });
+      logger.warn("queries/posts:incrementReportCountPost:notFound", {
+        postId,
+      });
       throw new Error("Post not found");
     }
 
@@ -180,7 +200,7 @@ export async function incrementReportCountPost(postId: string) {
   } catch (error) {
     logger.error("queries/posts:incrementReportCountPost", {
       postId,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -280,7 +300,7 @@ export async function updatePost(post: PostSubmition, postId: string) {
   } catch (error) {
     logger.error("queries/posts:updatePost", {
       postId,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }

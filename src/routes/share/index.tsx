@@ -11,13 +11,13 @@ export const Route = createFileRoute("/share/")({
     try {
       logger.info("routes/share/index:loader");
       const result = await getSharePostsFn({ data: {} });
-      logger.info("routes/share/index:loader:success", { 
-        postCount: result.posts?.length || 0 
+      logger.info("routes/share/index:loader:success", {
+        postCount: result.posts?.length || 0,
       });
       return result;
     } catch (error) {
-      logger.error("routes/share/index:loader", { 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error("routes/share/index:loader", {
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

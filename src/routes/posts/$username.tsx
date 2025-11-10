@@ -9,17 +9,21 @@ export const Route = createFileRoute("/posts/$username")({
   component: RouteComponent,
   loader: async ({ params }) => {
     try {
-      logger.info("routes/posts/$username:loader", { username: params.username });
-      const result = await getPostsByUsernameFn({ data: { username: params.username } });
-      logger.info("routes/posts/$username:loader:success", { 
+      logger.info("routes/posts/$username:loader", {
         username: params.username,
-        postCount: result.posts?.length || 0 
+      });
+      const result = await getPostsByUsernameFn({
+        data: { username: params.username },
+      });
+      logger.info("routes/posts/$username:loader:success", {
+        username: params.username,
+        postCount: result.posts?.length || 0,
       });
       return result;
     } catch (error) {
-      logger.error("routes/posts/$username:loader", { 
+      logger.error("routes/posts/$username:loader", {
         username: params.username,
-        error: error instanceof Error ? error.message : String(error) 
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

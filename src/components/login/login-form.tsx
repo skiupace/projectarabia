@@ -45,9 +45,7 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
   if (!siteKey) {
     return (
       <div className="max-w-2xl p-4">
-        <div className="text-center text-sm text-gray-600">
-          جاري التحميل...
-        </div>
+        <div className="text-center text-sm text-gray-600">جاري التحميل...</div>
       </div>
     );
   }

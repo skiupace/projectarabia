@@ -11,13 +11,13 @@ export const Route = createFileRoute("/comments/")({
     try {
       logger.info("routes/comments/index:loader");
       const result = await getComments({ data: {} });
-      logger.info("routes/comments/index:loader:success", { 
-        commentCount: result.comments?.length || 0 
+      logger.info("routes/comments/index:loader:success", {
+        commentCount: result.comments?.length || 0,
       });
       return result;
     } catch (error) {
-      logger.error("routes/comments/index:loader", { 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error("routes/comments/index:loader", {
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

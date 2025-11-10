@@ -16,11 +16,13 @@ export const Route = createFileRoute("/post/")({
         logger.warn("routes/post/index:beforeLoad:unauthorized");
         throw redirect({ to: "/login" });
       }
-      logger.info("routes/post/index:beforeLoad:success", { userId: user.userId });
+      logger.info("routes/post/index:beforeLoad:success", {
+        userId: user.userId,
+      });
     } catch (error) {
       if (error instanceof Response) throw error; // Re-throw redirect
       logger.error("routes/post/index:beforeLoad", {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

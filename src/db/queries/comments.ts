@@ -10,10 +10,10 @@ export async function createComment(
   data: CommentSubmission & { userId: string },
 ) {
   try {
-    logger.info("queries/comments:createComment", { 
-      userId: data.userId, 
+    logger.info("queries/comments:createComment", {
+      userId: data.userId,
       postId: data.comment.postId,
-      hasParent: !!data.comment.parentId
+      hasParent: !!data.comment.parentId,
     });
     const comment: Comment = {
       id: undefined as unknown as string, // Let DB generate or assign inside the model
@@ -29,17 +29,17 @@ export async function createComment(
       updatedAt: null, // Let DB auto-populate if needed
     };
     const result = await db.insert(comments).values(comment).returning().get();
-    logger.info("queries/comments:createComment:success", { 
-      commentId: result.id, 
+    logger.info("queries/comments:createComment:success", {
+      commentId: result.id,
       postId: data.comment.postId,
-      userId: data.userId
+      userId: data.userId,
     });
     return result;
   } catch (error) {
-    logger.error("queries/comments:createComment", { 
+    logger.error("queries/comments:createComment", {
       userId: data.userId,
       postId: data.comment.postId,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -60,9 +60,9 @@ export async function updateComment(id: string, text: string) {
     logger.info("queries/comments:updateComment:success", { commentId: id });
     return result;
   } catch (error) {
-    logger.error("queries/comments:updateComment", { 
+    logger.error("queries/comments:updateComment", {
       commentId: id,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -80,9 +80,9 @@ export async function hideComment(id: string) {
     logger.info("queries/comments:hideComment:success", { commentId: id });
     return result;
   } catch (error) {
-    logger.error("queries/comments:hideComment", { 
+    logger.error("queries/comments:hideComment", {
       commentId: id,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -157,18 +157,22 @@ export async function incrementReportCountComment(commentId: string) {
       .where(eq(comments.id, commentId))
       .get();
     if (!comment) {
-      logger.warn("queries/comments:incrementReportCountComment:notFound", { commentId });
+      logger.warn("queries/comments:incrementReportCountComment:notFound", {
+        commentId,
+      });
       throw new Error("Comment not found");
     }
     await db
       .update(comments)
       .set({ reportCount: comment.reportCount ? comment.reportCount + 1 : 1 })
       .where(eq(comments.id, commentId));
-    logger.info("queries/comments:incrementReportCountComment:success", { commentId });
-  } catch (error) {
-    logger.error("queries/comments:incrementReportCountComment", { 
+    logger.info("queries/comments:incrementReportCountComment:success", {
       commentId,
-      error: error instanceof Error ? error.message : String(error) 
+    });
+  } catch (error) {
+    logger.error("queries/comments:incrementReportCountComment", {
+      commentId,
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -197,7 +201,9 @@ export async function incrementVoteCountComment(commentId: string) {
       .where(eq(comments.id, commentId))
       .get();
     if (!comment) {
-      logger.warn("queries/comments:incrementVoteCountComment:notFound", { commentId });
+      logger.warn("queries/comments:incrementVoteCountComment:notFound", {
+        commentId,
+      });
       throw new Error("Comment not found");
     }
     await db
@@ -205,9 +211,9 @@ export async function incrementVoteCountComment(commentId: string) {
       .set({ votes: comment.votes + 1 })
       .where(eq(comments.id, commentId));
   } catch (error) {
-    logger.error("queries/comments:incrementVoteCountComment", { 
+    logger.error("queries/comments:incrementVoteCountComment", {
       commentId,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
