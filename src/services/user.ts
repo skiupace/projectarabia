@@ -19,6 +19,7 @@ import { validateTurnstile } from "./cloudflare";
 import { revokeBadge } from "./badges";
 import { BadgeId } from "@/enum/badges";
 import type { SafeUserWithStatus } from "@/types/users";
+import { env } from "cloudflare:workers";
 
 async function getUserByUsername(username: string): Promise<User | null> {
   // Validate username
@@ -176,7 +177,7 @@ export async function updateUserProfile(updatePayload: UserProfileSubmission) {
         "verify",
         {
           to: updatePayload.email,
-          link: `${process.env.VITE_DOMAIN}/verify/${token}`,
+          link: `${env.DOMAIN}/verify/${token}`,
         },
         process.env.RESEND_API_KEY,
       );
