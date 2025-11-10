@@ -75,6 +75,31 @@ bun run dev
 
 ---
 
+## Environment Variables
+
+Below are the environment variables required to run ProjectArabia.  
+Copy these into your `.env` file and set the appropriate values.
+
+```env
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_D1_TOKEN=
+
+RESEND_API_KEY=
+
+SECRET_KEY=
+SESSION_SECRET=
+```
+
+- **CLOUDFLARE_ACCOUNT_ID**: Your Cloudflare account ID.
+- **CLOUDFLARE_D1_TOKEN**: API token for D1 database access.
+- **RESEND_API_KEY**: Your Resend (email service provider) API key.
+- **SECRET_KEY**: Used for encryption and signing.
+- **SESSION_SECRET**: Session cookie secret.
+
+All variables are required for a successful build and deployment.
+
+---
+
 ## Deployment
 
 To deploy to production:
