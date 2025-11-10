@@ -16,10 +16,10 @@ export const users = sqliteTable(
       .$defaultFn(() => new Date().toISOString()),
     updatedAt: text("updated_at").$defaultFn(() => new Date().toISOString()),
   },
-  (table) => ({
-    usernameIdx: uniqueIndex("users_username_idx").on(table.username),
-    emailIdx: uniqueIndex("users_email_idx").on(table.email),
-  }),
+  (table) => [
+    uniqueIndex("users_username_idx").on(table.username),
+    uniqueIndex("users_email_idx").on(table.email),
+  ],
 );
 
 export type User = typeof users.$inferSelect;
