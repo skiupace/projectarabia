@@ -42,7 +42,7 @@ async function fetchRankedFeed(
   // For now, we set hasMore as provided by getHotPosts, and totalPosts as length of posts (may need improvement)
   return {
     posts: result.posts,
-    hasMore: result.hasMore ?? (result.posts.length === MAX_POSTS),
+    hasMore: result.hasMore ?? result.posts.length === MAX_POSTS,
     totalPosts: result.totalPosts ?? result.posts.length,
   };
 }

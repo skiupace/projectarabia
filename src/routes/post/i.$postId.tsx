@@ -38,6 +38,64 @@ export const Route = createFileRoute("/post/i/$postId")({
       throw error;
     }
   },
+  head(ctx) {
+    const post = ctx.loaderData?.postWithComments?.post;
+
+    if (!post) {
+      return {
+        meta: [
+          {
+            title: "منشور غير موجود - بابل",
+          },
+          {
+            name: "description",
+            content: "المنشور المطلوب غير موجود",
+          },
+        ],
+      };
+    }
+
+    const title = post.title;
+    const description = post.text
+      ? post.text.slice(0, 160) + (post.text.length > 160 ? "..." : "")
+      : `منشور من ${post.username || "مستخدم"} على بابل`;
+
+    return {
+      meta: [
+        {
+          title: `${title} - بابل`,
+        },
+        {
+          name: "description",
+          content: description,
+        },
+        {
+          property: "og:title",
+          content: title,
+        },
+        {
+          property: "og:description",
+          content: description,
+        },
+        {
+          property: "og:type",
+          content: "article",
+        },
+        {
+          name: "twitter:card",
+          content: "summary",
+        },
+        {
+          name: "twitter:title",
+          content: title,
+        },
+        {
+          name: "twitter:description",
+          content: description,
+        },
+      ],
+    };
+  },
 });
 
 function RouteComponent() {
