@@ -192,7 +192,16 @@ export default function CommentRow({ comment }: CommentRowProps) {
             ▲ {comment.votes}
           </button>
         ) : (
-          <span>{comment.votes} نقطة</span>
+          <span>
+            {comment.votes}{" "}
+            {comment.votes === 1
+              ? "نقطة"
+              : comment.votes === 2
+              ? "نقطتين"
+              : comment.votes > 2 && comment.votes <= 10
+              ? "نقاط"
+              : "نقطة"}
+          </span>
         )}
         {isLoggedIn && didVote && (
           <>

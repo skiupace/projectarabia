@@ -341,7 +341,14 @@ export default function CommentItem({
                 ▲ {comment.votes}
               </button>
             ) : (
-              <span className="text-zinc-400">{comment.votes} نقطة</span>
+              <span className="text-zinc-400">
+                {comment.votes}{" "}
+                {comment.votes === 1
+                  ? "نقطة"
+                  : comment.votes === 2
+                  ? "نقطتين"
+                  : "نقاط"}
+              </span>
             )}
           </div>
 

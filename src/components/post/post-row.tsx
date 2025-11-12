@@ -151,7 +151,16 @@ export default function PostRow({ post, rank }: PostWithOrder) {
         </div>
         {/* Metadata */}
         <div className="text-[10px] text-zinc-500 mt-0.5 flex items-center gap-1 flex-wrap">
-          <span>{post.votes} نقطة</span>
+          <span>
+            {post.votes}{" "}
+            {post.votes === 1
+              ? "نقطة"
+              : post.votes === 2
+              ? "نقطتين"
+              : post.votes > 2 && post.votes <= 10
+              ? "نقاط"
+              : "نقطة"}
+          </span>
           <span className="text-zinc-400">•</span>
           <Link
             to="/user/$username"

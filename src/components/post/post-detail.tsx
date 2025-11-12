@@ -247,7 +247,16 @@ export default function PostDetail({ post, commentsLength }: PostDetailProps) {
           </div>
           {/* Metadata */}
           <div className="text-[10px] text-zinc-500 flex items-center gap-1 flex-wrap">
-            <span>{voteCount} نقطة</span>
+            <span>
+              {voteCount}{" "}
+              {voteCount === 1
+                ? "نقطة"
+                : voteCount === 2
+                ? "نقطتين"
+                : voteCount > 2 && voteCount <= 10
+                ? "نقاط"
+                : "نقطة"}
+            </span>
             <span className="text-zinc-400">•</span>
             <Link
               to="/user/$username"
