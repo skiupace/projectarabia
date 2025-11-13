@@ -290,6 +290,8 @@ export async function editPost(
   | { success: true; postId: string }
   | { success: false; error: string; errorCode: string }
 > {
+  const userStatus = await getUserStatus(userId);
+  const isModerator = userStatus?.role === "moderator";
   // Validate Turnstile token
   const turnstileResult = await validateTurnstile(data.cf_turnstile);
   if (!turnstileResult.success) {
@@ -332,7 +334,7 @@ export async function editPost(
 
   const createdAtDate = new Date(existingPost.createdAt);
   const now = new Date();
-  if (differenceInMinutes(now, createdAtDate) > EDIT_COOLDOWN_MINUTES) {
+  if (differenceInMinutes(now, createdAtDate) > EDIT_COOLDOWN_MINUTES && !isModerator) {
     return {
       success: false,
       error: `انتهت مهلة تعديل المنشور (${EDIT_COOLDOWN_MINUTES} دقيقة فقط)`,
