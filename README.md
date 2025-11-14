@@ -102,16 +102,47 @@ All variables are required for a successful build and deployment.
 
 ## Deployment
 
+
+### Account setup & Database setup
+
+#### Production Setup
+
+For production deployment, follow the [Drizzle ORM Cloudflare D1 documentation](https://orm.drizzle.team/docs/connect-cloudflare-d1) to set up your D1 database and configure the necessary environment variables.
+
+You'll need to:
+1. Create a D1 database in your Cloudflare dashboard
+2. Set up your `wrangler.jsonc` with the D1 database configuration
+3. Configure the required environment variables (see [Environment Variables](#environment-variables) section)
+
+#### Local Development Setup
+
+For local development, you need to configure the database path in `drizzle.config.ts`:
+
+1. Start your dev server once: `bun run dev`
+2. Navigate to `.wrangler/state/v3/d1/miniflare-D1DatabaseObject/` directory
+3. Find your database file (it will be a `.sqlite` file with a long hash name)
+4. Copy the full path to that file
+5. Update `drizzle.config.ts` and replace the `url` in the `dbCredentials` object with your database path
+
+Example:
+```typescript
+dbCredentials: {
+  url: ".wrangler/state/v3/d1/miniflare-D1DatabaseObject/YOUR_DATABASE_FILE.sqlite",
+}
+```
+
+#### Deploy to Production
+
 To deploy to production:
 
 ```bash
-# Set all environment variables from .env file
+# Set all environment variables from .env file to production environment
 bun wrangler secret bulk .env --env production
 
-# Build the project
+# Build the project for production
 bun run build
 
-# Deploy to Cloudflare
+# Deploy to Cloudflare production environment
 bun run deploy
 ```
 
